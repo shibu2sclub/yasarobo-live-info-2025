@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-    <meta charset="UTF-8" />
-    <meta lang="ja" />
-    <title>タイマー</title>
+    <meta charset="UTF-8">
+    <title>Timer</title>
 </head>
 <body>
-    <form onsubmit="return startStop();">
+    <form onsubmit="return nodecg.sendMessage('startStopTimer');">
         <input type="submit" value="スタート・ストップ" />
+    </form><br>
+
+    <form onsubmit="return nodecg.sendMessage('nextTimer');">
+        <input type="submit" value="次へ" />
     </form>
-    <form onsubmit="return resetTimer();">
-        <input type="submit" value="リセット" />
+    <form onsubmit="return addRetry();">
+        <input type="submit" value="リトライ" />
+    </form>
+    <br><br>
+
+    <form onsubmit="return nodecg.sendMessage('resetTimer');">
+        <input type="submit" value="最初から" />
     </form>
 </body>
 <script type="text/javascript">
-    function startStop() {
-        nodecg.sendMessage("startStop");
-    }
 
-    function resetTimer() {
-        nodecg.sendMessage("reset");
-    }
 </script>
 </html>

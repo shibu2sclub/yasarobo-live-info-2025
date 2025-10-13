@@ -14,57 +14,11 @@
         "width": 5,
         "file": "player.html",
         "workspace": "workspace"
-      },
-      {
-        "name": "チャレンジャーズ - 得点の切り替え",
-        "title": "チャレンジャーズ - 得点の切り替え",
-        "width": 5,
-        "file": "point-c.html",
-        "workspace": "workspace"
-      },
-      {
-        "name": "やさしい - 得点の切り替え",
-        "title": "やさしい - 得点の切り替え",
-        "width": 5,
-        "file": "point-y.html",
-        "workspace": "workspace"
-      },
-      {
-        "name": "タイマー",
-        "title": "タイマー",
-        "width": 5,
-        "file": "timer.html",
-        "workspace": "workspace"
       }
     ],
     "graphics": [
       {
         "file": "live-c.html",
-        "width": "1920",
-        "height": "1080"
-      },
-      {
-        "file": "live-y.html",
-        "width": "1920",
-        "height": "1080"
-      },
-      {
-        "file": "live-bg.html",
-        "width": "1920",
-        "height": "1080"
-      },
-      {
-        "file": "live-timer.html",
-        "width": "1920",
-        "height": "1080"
-      },
-      {
-        "file": "live-course-c.html",
-        "width": "1920",
-        "height": "1080"
-      },
-      {
-        "file": "live-course-y.html",
         "width": "1920",
         "height": "1080"
       }
