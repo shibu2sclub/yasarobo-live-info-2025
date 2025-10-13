@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta lang="ja" />
+    <title>競技者の切り替え</title>
+</head>
+<body>
+    <p>更新ボタンを押すと更新されます</p>
+    <p>得点もリセットされます</p>
+    <form onsubmit="return setPlayerName();">
+        ロボット名：<input type = "text" name = "name" />
+        チーム名 - 所属：<input type = "text" name = "team" />
+        <input type="submit" value="切り替え" />
+    </form>
+</body>
+<script type="text/javascript">
+    const nameInput = document.getElementsByName("name")[0];
+    const teamInput = document.getElementsByName("team")[0];
+    nodecg.Replicant("playerName").on("change", (newVal, oldVal) => {
+        nameInput.value = newVal.name;
+        teamInput.value = newVal.team;
+    });
+
+    function setPlayerName() {
+        nodecg.Replicant("playerName").value = {
+            name: nameInput.value,
+            team: teamInput.value
+        }
+
+        nodecg.Replicant("pointC").value = {
+            red: 0,
+            yellow: 0,
+            blue: 0,
+            tennis: 0,
+            wrongColor: 0,
+            retry: 0
+        }
+
+        nodecg.Replicant("pointY").value = {
+            total: 0,
+            retry: 0
+        }
+
+        nodecg.sendMessage("reset");
+    }
+</script>
+</html>

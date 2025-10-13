@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta lang="ja" />
+    <title>タイマー</title>
+</head>
+<body>
+    <form onsubmit="return startStop();">
+        <input type="submit" value="スタート・ストップ" />
+    </form>
+    <form onsubmit="return resetTimer();">
+        <input type="submit" value="リセット" />
+    </form>
+</body>
+<script type="text/javascript">
+    function startStop() {
+        nodecg.sendMessage("startStop");
+    }
+
+    function resetTimer() {
+        nodecg.sendMessage("reset");
+    }
+</script>
+</html>

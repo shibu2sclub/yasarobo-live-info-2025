@@ -1,0 +1,160 @@
+body {
+    padding: 0 50px;
+}
+
+#live-info {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 30px;
+}
+
+#live-info > div {
+    height: 120px;
+    border-radius: 15px;
+    background-color: white;
+    color: #111;
+}
+
+#total {
+    width: 200px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#total > div {
+    position: absolute;
+}
+
+#total-title {
+    top: 5px;
+    left: 10px;
+    font-size: 20px;
+}
+
+#total-value {
+    top: 30px;
+    left: 60px;
+    font-size: 50px;
+    transform: translateX(-50%);
+    height: 55px;
+    width: 60px;
+    line-height: 55px;
+}
+
+#total-value > div{
+    height: 55px;
+    width: 60px;
+    text-align: center;
+}
+
+#total-bar {
+    width: 1px;
+    height: 50px;
+    background-color: #111;
+
+    top: 52px;
+    left: 118px;
+
+    transform: rotate(20deg);
+}
+
+#total-perfect {
+    bottom: 10px;
+    right: 30px;
+    font-size: 28px;
+}
+
+#detail {
+    width: 700px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+}
+
+#detail > p {
+    font-size: 25px;
+}
+
+#detail > div {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 115px;
+    font-size: 28px;
+    height: 30px;
+    line-height: 28px;
+}
+
+#detail > div > div {
+    height: 30px;
+    left: 35px;
+}
+
+#detail > #margin {
+    width: 8px;
+}
+
+#detail > div::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+}
+
+#red::before {
+    background-color: #AF1E21;
+}
+
+#yellow::before {
+    background-color: #D2A11A;
+}
+
+#blue::before {
+    background-color: #1C3460;
+}
+
+#tennis::before {
+    border: 2px solid #D2A11A;
+    box-sizing: border-box;
+}
+
+#wrong-color::before {
+    background-color: #7D7D7D;
+}
+
+#retry {
+    width: 100px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#retry > div {
+    position: absolute;
+}
+
+#retry-title {
+    top: 5px;
+    left: 10px;
+    font-size: 20px;
+}
+
+#retry-value {
+    top: 60px;
+    left: 50px;
+    font-size: 50px;
+    transform: translateX(-50%) translateY(-50%);
+    height: 55px;
+    width: 60px;
+    line-height: 55px;
+}
+
+#retry-value > div{
+    height: 55px;
+    width: 60px;
+    text-align: center;
+}
