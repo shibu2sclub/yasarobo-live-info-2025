@@ -45,7 +45,7 @@ npm install --global nodecg@latest
 nodecg setup
 
 # bundles配下にこのリポジトリをクローン
-nodecg install shobu2sclub/yasarobo-live-info-2025
+nodecg install shibu2sclub/yasarobo-live-info-2025
 ```
 
 ## トラブルシューティング
