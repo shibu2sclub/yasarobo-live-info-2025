@@ -45,7 +45,7 @@ npm install --global nodecg-cli@latest
 nodecg setup
 
 # bundles配下にこのリポジトリをクローン
-nodecg install student-team-conf/2024-live-layout
+nodecg install shobu2sclub/yasarobo-live-info-2025
 ```
 
 ## トラブルシューティング
