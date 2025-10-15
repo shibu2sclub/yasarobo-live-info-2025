@@ -5,20 +5,26 @@
     <title>Timer</title>
 </head>
 <body>
-    <form onsubmit="return nodecg.sendMessage('startStopTimer');">
+    <form onsubmit="return nodecg.sendMessage('timerStartStop');">
         <input type="submit" value="スタート・ストップ" />
     </form><br>
 
-    <form onsubmit="return nodecg.sendMessage('nextTimer');">
-        <input type="submit" value="次へ" />
+    <form onsubmit="return nodecg.sendMessage('timerPrepare');">
+        <input type="submit" value="競技準備へリセット" />
     </form>
-    <form onsubmit="return addRetry();">
-        <input type="submit" value="リトライ" />
+    <form onsubmit="return nodecg.sendMessage('timerReady');">
+        <input type="submit" value="競技開始へリセット" />
     </form>
     <br><br>
-
-    <form onsubmit="return nodecg.sendMessage('resetTimer');">
-        <input type="submit" value="最初から" />
+    <form onsubmit="return nodecg.sendMessage('aaa');">
+        <input type="submit" value="5分モード" />
+    </form>
+    <form onsubmit="return nodecg.sendMessage('aaa');">
+        <input type="submit" value="10分モード" />
+    </form>
+    <br><br>
+    <form onsubmit="return addRetry();">
+        <input type="submit" value="リトライ" />
     </form>
 </body>
 <script type="text/javascript">
