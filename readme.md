@@ -30,7 +30,7 @@ NodeCGで動作する配信画面と管理ツールです。
 * Windows 11（10以降はおそらくOK）
 * Powershell 7以降
 * Node.jsインストール済み
-    * V18系列のインストールが必要（ホームページのNode.jsより古い）。NVM等のインストール、使用でNode.jsのバージョン切り替えが可能
+    * V22系列のインストールが必要
 
 ## NodeCGの導入・プロジェクト構築
 [https://qiita.com/nanana08/items/73e3dcb33676c93eddac]
