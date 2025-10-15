@@ -9,21 +9,29 @@
         <input type="submit" value="スタート・ストップ" />
     </form><br>
 
-    <form onsubmit="return nodecg.sendMessage('timerPrepare');">
-        <input type="submit" value="競技準備へリセット" />
+    <form onsubmit="return timerMode(0);">
+        <input type="submit" value="リセット（競技準備待機）" />
     </form>
-    <form onsubmit="return nodecg.sendMessage('timerReady');">
-        <input type="submit" value="競技開始へリセット" />
+    <form onsubmit="return timerMode(1);">
+        <input type="submit" value="リセット（競技開始待機）" />
     </form>
     <br><br>
-    <form onsubmit="return nodecg.sendMessage('aaa');">
-        <input type="submit" value="5分モード" />
+    <form onsubmit="return setLimitTime(5);">
+        <input type="submit" value="競技時間5分" />
     </form>
-    <form onsubmit="return nodecg.sendMessage('aaa');">
-        <input type="submit" value="10分モード" />
+    <form onsubmit="return setLimitTime(10);">
+        <input type="submit" value="競技時間10分" />
     </form>
 </body>
 <script type="text/javascript">
+    function setLimitTime(min) {
+        nodecg.Replicant("timerLimit").value = min;
+        return false;
+    }
 
+    function setTimerMode(mode) {   // リセットは関数分ける？？
+        nodecg.Replicant("timerMode").value = mode;
+        return false;
+    }
 </script>
 </html>
