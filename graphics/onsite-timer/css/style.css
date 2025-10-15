@@ -1,0 +1,85 @@
+@font-face {
+	font-family: "DSEG";
+	src: url("../font/DSEG7Classic-Bold.woff") format('woff');
+}
+
+body {
+	font-family: 'Noto Sans JP', sans-serif;
+	background-color: #000000;
+}
+.body-container {
+	width: 100%;
+	margin: 0 auto;
+}
+
+.bar {
+	margin: 0;
+}
+
+.retry-box {
+	position: absolute;
+	top: 0;
+	left: calc(77000vw / 980);
+}
+
+.retry {
+	color: #ff0000;
+	position: absolute;
+	font-size: calc(4500vw / 980);
+	letter-spacing: calc(250vw / 980);
+	margin-top: calc(1500vw / 980);
+}
+
+.timer {
+	margin: 0;
+}
+
+.countdown_box {
+	position: relative;
+	overflow: hidden;
+}
+
+.countdown_txt {
+	transform: skewX(-5deg);
+}
+
+.countdown {
+	margin-top: 0;
+	margin-left: calc(-7000vw / 980);
+	font-family: "DSEG";
+	width: 100%;
+	color: #ff831b;
+	transform: skewX(-10deg);
+}
+
+.countdown_bg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 0.12;
+	pointer-events: none;
+}
+
+.countdown_minSec {
+	font-size: calc(23600vw / 980);
+}
+
+.countdown_msec {
+	font-size: calc(11800vw / 980);
+	margin-left: calc(-500vw / 980);
+}
+
+#countdown_status {
+	margin-top: 0;
+	font-size: calc(9000vw / 980);
+	text-align: center;
+	color: #ffffff;
+}
+
+.status {
+	margin: 0;
+}
+
+.limit_time {
+	color: #ffffff;
+}

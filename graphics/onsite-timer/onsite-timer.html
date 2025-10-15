@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width = device-width, initial-scale = 1, shrink-to-fit = no">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="css/style.css?date=2023062102">
+    <link rel="stylesheet" type="text/css" href="css/normalize.css">
+
+    <title>InRoF Timer</title>
+</head>
+
+<body>
+    <div class="body-container">
+        <p class="bar">
+            <img src="img/bar.png" width="100%" height="60px">
+        </p>
+        <p class="timer">
+        <div class="countdown_box">
+            <div class="countdown_txt">
+                <span class="countdown countdown_min" id="countdown_minSec"><span id = "countdown_min">!2</span>:<span id = "countdown_sec">00</span></span>
+                <span class="countdown countdown_msec" id="countdown_msec"> 00</span>
+            </div>
+            <div class="countdown_bg countdown_txt">
+                <span class="countdown countdown_min">18:88</span><span class="countdown countdown_msec"> 88</span>
+            </div>
+            <div class="retry-box">
+                <span class="retry">Retry:<span id="retry_no">0</span></span>
+            </div>
+        </div>
+        </p>
+        <p class="bar">
+            <img src="img/bar.png" width="100%" height="60px">
+        </p>
+        <p class="status" id="countdown_status">ロボット準備待ち</p>
+    </div>
+</body>
+<script type="text/javascript">
+    ;
+</script>
+</html>
