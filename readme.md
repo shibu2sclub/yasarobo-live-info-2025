@@ -39,7 +39,7 @@ NodeCGで動作する配信画面と管理ツールです。
 
 ```powershell
 # cliをインストール
-npm install --global nodecg-cli@latest
+npm install --global nodecg@latest
 
 # プロジェクトを作成
 nodecg setup
