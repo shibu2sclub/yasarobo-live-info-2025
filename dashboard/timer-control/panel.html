@@ -12,41 +12,26 @@
         <h2>Timer Control</h2>
 
         <div class="row">
-            <button id="startUp">Start Count Up</button>
-            <button id="startDown">Start Count Down</button>
-        </div>
-
-        <div class="row">
-            <label>Countdown Target (mm:ss.cc)</label>
-            <input id="target" type="text" placeholder="05:00.00" value="05:00.00" />
-            <button id="applyTarget">Apply Target</button>
-        </div>
-
-        <div class="row">
-            <button id="pause">Pause</button>
-            <button id="resume">Resume</button>
+            <label>準備時間 (mm:ss)</label>
+            <input id="prep" type="text" placeholder="02:00" value="02:00" />
+            <label>競技時間 (mm:ss)</label>
+            <input id="match" type="text" placeholder="05:00" value="05:00" />
+            <button id="applyDurations">設定を保存</button>
+            <button id="resetToPrep">準備開始に戻る</button> <!-- ← 追加 -->
             <button id="reset" class="danger">Reset</button>
         </div>
 
         <div class="row">
-            <label>Mode</label>
-            <select id="mode">
-                <option value="countup">Count Up</option>
-                <option value="countdown">Count Down</option>
-            </select>
-            <button id="applyMode">Apply Mode</button>
-        </div>
-
-        <div class="row">
-            <label>Speed (1.0 normal)</label>
-            <input id="speed" type="number" min="0.1" step="0.1" value="1.0" />
-            <button id="applySpeed">Apply Speed</button>
+            <button id="toggleRun">Start / Resume</button>
+            <button id="forceMatch">競技開始（手動）</button>
         </div>
 
         <div class="status">
+            <div><strong>Stage:</strong> <span id="stStage">prep</span></div>
             <div><strong>Running:</strong> <span id="stRunning">false</span></div>
-            <div><strong>Mode:</strong> <span id="stMode">countup</span></div>
             <div><strong>Rev:</strong> <span id="stRev">0</span></div>
+            <div><strong>Status:</strong> <span id="stStatus">------</span></div>
+            <div><strong>Prep/Match(ms):</strong> <span id="stDur">120000 / 300000</span></div>
         </div>
     </div>
 
