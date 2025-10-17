@@ -30,26 +30,13 @@ body {
 	margin-top: calc(1500vw / 980);
 }
 
-.timer {
+.timer-wrapper {
 	margin: 0;
 }
 
 .countdown_box {
 	position: relative;
 	overflow: hidden;
-}
-
-.countdown_txt {
-	transform: skewX(-5deg);
-}
-
-.countdown {
-	margin-top: 0;
-	margin-left: calc(-7000vw / 980);
-	font-family: "DSEG";
-	width: 100%;
-	color: #ff831b;
-	transform: skewX(-10deg);
 }
 
 .countdown_bg {
@@ -60,16 +47,23 @@ body {
 	pointer-events: none;
 }
 
-.countdown_minSec {
+.countdown_txt {
 	font-size: calc(23600vw / 980);
+
+	margin-top: 0;
+	margin-left: calc(-7000vw / 980);
+	font-family: "DSEG";
+	width: calc(100% + 7000vw / 980);
+	color: #ff831b;
+	transform: skewX(-10deg);
 }
 
-.countdown_msec {
+.countdown_txt > span {
 	font-size: calc(11800vw / 980);
 	margin-left: calc(-500vw / 980);
 }
 
-#countdown_status {
+#status {
 	margin-top: 0;
 	font-size: calc(9000vw / 980);
 	text-align: center;
