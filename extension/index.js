@@ -222,4 +222,69 @@ module.exports = (nodecg) => {
         const ps = pointState.value;
         pointState.value = { ...ps, rev: ps.rev + 1 };
     }, 5000);
+
+
+    // ── Player Management ───────────────────────────────────────────────
+    /**
+     * @typedef {{ id: string, robot: string }} PlayerEntry
+     * @typedef {{ id: string, robot: string } | null} CurrentPlayer
+     */
+
+    // 登録リストは永続
+    const playerRoster = nodecg.Replicant('playerRoster', {
+        persistent: true,
+        defaultValue: /** @type {PlayerEntry[]} */ ([]),
+    });
+
+    // 現在表示中は一時（リロードで消える）
+    const currentPlayer = nodecg.Replicant('currentPlayer', {
+        persistent: false,
+        defaultValue: /** @type {CurrentPlayer} */ (null),
+    });
+
+    nodecg.listenFor('player-control', (msg) => {
+        switch (msg.action) {
+            case 'add': {
+                // msg.id, msg.robot
+                const id = String(msg.id || '').trim();
+                const robot = String(msg.robot || '').trim();
+                if (!id || !robot) return;
+                const list = Array.isArray(playerRoster.value) ? [...playerRoster.value] : [];
+                // 同じIDがあれば上書き
+                const idx = list.findIndex(p => p.id === id);
+                if (idx >= 0) list[idx] = { id, robot };
+                else list.push({ id, robot });
+                playerRoster.value = list;
+                break;
+            }
+            case 'remove': {
+                const id = String(msg.id || '').trim();
+                if (!id) return;
+                const list = (playerRoster.value || []).filter(p => p.id !== id);
+                playerRoster.value = list;
+                // 表示中だったら消す
+                if (currentPlayer.value?.id === id) currentPlayer.value = null;
+                break;
+            }
+            case 'clear-roster': {
+                playerRoster.value = [];
+                currentPlayer.value = null;
+                break;
+            }
+            case 'select': {
+                // id指定で currentPlayer に反映
+                const id = String(msg.id || '').trim();
+                const p = (playerRoster.value || []).find(x => x.id === id);
+                currentPlayer.value = p ? { id: p.id, robot: p.robot } : null;
+                break;
+            }
+            case 'clear-current': {
+                currentPlayer.value = null;
+                break;
+            }
+            default:
+                break;
+        }
+    });
+
 };

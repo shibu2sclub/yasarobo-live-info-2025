@@ -21,6 +21,13 @@
                 "width": 4,
                 "headerColor": "#222",
                 "file": "point/panel.html"
+            },
+            {
+                "name": "player",
+                "title": "Player",
+                "width": 4,
+                "headerColor": "#222",
+                "file": "player/panel.html"
             }
         ],
         "graphics": [
