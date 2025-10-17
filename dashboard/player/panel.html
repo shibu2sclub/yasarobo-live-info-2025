@@ -36,6 +36,18 @@
         </div>
     </div>
 
+    <!-- 既存のフォームの下など、適当な位置に追加 -->
+    <div class="row">
+        <input id="csvFile" type="file" accept=".csv" />
+        <button id="csvImportReplace">CSV取込（置換）</button>
+        <button id="csvImportUpsert">CSV取込（追加入替）</button>
+        <button id="csvExport">CSV書き出し</button>
+    </div>
+    <p style="font-size:12px; opacity:.8; margin:4px 0 0 0;">
+        CSV 形式: <code>id,robot</code>（1行目にヘッダあってもOK） / 例: <code>1234,Raptor-X</code>
+    </p>
+
+
     <script src="/nodecg-api.min.js"></script>
     <script src="./panel.js"></script>
 </body>

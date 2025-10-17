@@ -282,6 +282,32 @@ module.exports = (nodecg) => {
                 currentPlayer.value = null;
                 break;
             }
+
+            case 'bulk-set': {
+                // msg.mode: 'replace' | 'upsert'
+                // msg.rows: [{id, robot}, ...]
+                const mode = msg.mode === 'upsert' ? 'upsert' : 'replace';
+                const rows = Array.isArray(msg.rows) ? msg.rows : [];
+                const sanitized = rows
+                    .map(({ id, robot }) => ({ id: String(id || '').trim(), robot: String(robot || '').trim() }))
+                    .filter(p => p.id && p.robot);
+
+                if (mode === 'replace') {
+                    playerRoster.value = sanitized;
+                    // 表示中が有効なら保持、無効になったらクリア
+                    if (currentPlayer.value && !sanitized.find(p => p.id === currentPlayer.value.id)) {
+                        currentPlayer.value = null;
+                    }
+                } else {
+                    // upsert: 既存に対してIDで追加入替
+                    const map = new Map((playerRoster.value || []).map(p => [p.id, p]));
+                    sanitized.forEach(p => map.set(p.id, p));
+                    playerRoster.value = Array.from(map.values());
+                    // current は触らない
+                }
+                break;
+            }
+
             default:
                 break;
         }
