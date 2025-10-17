@@ -153,11 +153,73 @@ module.exports = (nodecg) => {
         }
     }, 100);
 
-    // 軽いハートビート（描画側の再キャリブレーション用）
-    setInterval(() => {
-        const s = timerState.value;
-        timerState.value = { ...s, rev: s.rev + 1 };
-    }, 2000);
+    /**
+   * Point 記録
+   * - 各色は正誤を boolean 配列で保持（true=色正解=3点 / false=色誤り=1点）
+   * - 自由ボールは 5 点、カウントで保持
+   * - total は拡張側で都度再計算
+   */
+    /**
+     * @typedef {{
+     *   red: boolean[];
+     *   yellow: boolean[];
+     *   blue: boolean[];
+     *   free: number;
+     *   total: number;
+     *   rev: number;
+     * }} PointState
+     */
 
-    nodecg.log.info('[yasarobo-timer] extension loaded (robocon spec)');
+    /** @type {import('nodecg/types/replicant').Replicant<PointState>} */
+    const pointState = nodecg.Replicant('pointState', {
+        persistent: false,
+        defaultValue: {
+            red: [],
+            yellow: [],
+            blue: [],
+            free: 0,
+            total: 0,
+            rev: 0
+        }
+    });
+
+    function recalcTotal(ps) {
+        const scoreColor = (arr) => arr.reduce((acc, ok) => acc + (ok ? 3 : 1), 0);
+        return scoreColor(ps.red) + scoreColor(ps.yellow) + scoreColor(ps.blue) + ps.free * 5;
+    }
+
+    nodecg.listenFor('point-control', (msg) => {
+        const ps = pointState.value;
+        switch (msg.action) {
+            case 'add-color': {
+                // msg.color: 'red'|'yellow'|'blue', msg.ok: boolean
+                const color = msg.color;
+                const ok = !!msg.ok;
+                if (!['red', 'yellow', 'blue'].includes(color)) return;
+                ps[color] = Array.isArray(ps[color]) ? ps[color] : [];
+                ps[color].push(ok);
+                const total = recalcTotal(ps);
+                pointState.value = { ...ps, total, rev: ps.rev + 1 };
+                break;
+            }
+            case 'add-free': {
+                ps.free = (ps.free || 0) + 1;
+                const total = recalcTotal(ps);
+                pointState.value = { ...ps, total, rev: ps.rev + 1 };
+                break;
+            }
+            case 'reset': {
+                pointState.value = { red: [], yellow: [], blue: [], free: 0, total: 0, rev: ps.rev + 1 };
+                break;
+            }
+            default:
+                break;
+        }
+    });
+
+    // 軽いハートビート（任意）：表示の再同期に使える
+    setInterval(() => {
+        const ps = pointState.value;
+        pointState.value = { ...ps, rev: ps.rev + 1 };
+    }, 5000);
 };

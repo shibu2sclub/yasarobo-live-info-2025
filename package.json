@@ -14,6 +14,13 @@
                 "width": 4,
                 "headerColor": "#222",
                 "file": "timer-control/panel.html"
+            },
+            {
+                "name": "point",
+                "title": "Point",
+                "width": 4,
+                "headerColor": "#222",
+                "file": "point/panel.html"
             }
         ],
         "graphics": [

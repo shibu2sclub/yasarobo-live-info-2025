@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Point</title>
+    <link rel="stylesheet" href="./panel.css" />
+</head>
+
+<body>
+    <div class="wrap">
+        <h2>Point</h2>
+
+        <div class="row">
+            <button data-act="red-correct">赤 正解(+3)</button>
+            <button data-act="red-wrong">赤 誤り(+1)</button>
+        </div>
+        <div class="row">
+            <button data-act="yellow-correct">黄 正解(+3)</button>
+            <button data-act="yellow-wrong">黄 誤り(+1)</button>
+        </div>
+        <div class="row">
+            <button data-act="blue-correct">青 正解(+3)</button>
+            <button data-act="blue-wrong">青 誤り(+1)</button>
+        </div>
+        <div class="row">
+            <button data-act="free">自由ボール(+5)</button>
+            <button id="reset" class="danger">Reset</button>
+        </div>
+
+        <div class="status">
+            <div><strong>Total:</strong> <span id="stTotal">0</span></div>
+            <div><strong>赤:</strong> <span id="stRed">[]</span></div>
+            <div><strong>黄:</strong> <span id="stYellow">[]</span></div>
+            <div><strong>青:</strong> <span id="stBlue">[]</span></div>
+            <div><strong>自由:</strong> <span id="stFree">0</span></div>
+            <div><strong>rev:</strong> <span id="stRev">0</span></div>
+        </div>
+    </div>
+
+    <script src="/nodecg-api.min.js"></script>
+    <script src="./panel.js"></script>
+</body>
+
+</html>
