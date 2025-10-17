@@ -30,22 +30,17 @@
         return Math.max(0, stageDurationMs(state) - computeElapsedMs());
     }
 
+    // ★ HTML出力対応
     function formatCentiseconds(ms) {
         const cs = Math.floor(ms / 10);
         const m = Math.floor(cs / 6000);
         const s = Math.floor((cs % 6000) / 100);
         const c = cs % 100;
-        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(c).padStart(2, '0')}`;
+        // 秒とセンチ秒の間にスペース、センチ秒を小さく
+        return `${String(m)}:${String(s).padStart(2, '0')}<span> ${String(c).padStart(2, '0')}</span>`;
     }
 
     function statusText(rem) {
-        // ①準備時間、タイマー開始前：ロボット準備待ち
-        // ②準備時間、タイマー進行中：ロボット準備
-        // ③競技時間前、タイマー開始前（手動遷移のみ）：競技開始待機
-        // ④競技時間、タイマー進行中：競　技　中
-        // ⑤準備/競技・一時停止：計測停止中
-        // ⑥競技タイムアップ：競　技　終　了
-        // ⑦その他：------
         if (!state) return '------';
         if (state.ended) return '競　技　終　了';
         if (!state.running) {
@@ -62,14 +57,13 @@
     }
 
     function currentDisplay() {
-        if (!state) return '00:00.00';
+        if (!state) return { html: '0:00<span> 00</span>', status: '------' };
         const rem = remainingMs();
         let formatted = formatCentiseconds(rem);
-        // graphics 側のオーバーライド（分の装飾など）
         if (typeof window.timerFormatOverride === 'function') {
             formatted = window.timerFormatOverride(formatted, rem, state);
         }
-        return { text: formatted, status: statusText(rem) };
+        return { html: formatted, status: statusText(rem) };
     }
 
     function tick() {
@@ -77,7 +71,6 @@
         const elStatus = document.getElementById('status');
         if (!elTimer) return requestAnimationFrame(tick);
 
-        // レイアウトに合わせてフォントサイズを自動調整
         const wrap = document.querySelector('.timer-wrap');
         if (wrap) {
             const rect = wrap.getBoundingClientRect();
@@ -85,10 +78,10 @@
             elTimer.style.fontSize = `${fontSize}px`;
         }
 
-        const { text, status } = currentDisplay();
-        if (text !== lastText) {
-            elTimer.textContent = text;
-            lastText = text;
+        const { html, status } = currentDisplay();
+        if (html !== lastText) {
+            elTimer.innerHTML = html; // ← textContent → innerHTML に変更
+            lastText = html;
         }
         if (elStatus && status !== lastStatus) {
             elStatus.textContent = status;

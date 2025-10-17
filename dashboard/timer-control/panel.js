@@ -89,5 +89,4 @@
         const matchMs = parseMsMMSS(elMatch.value);
         send('set-durations', { prepMs, matchMs });
     });
-    document.querySelector('#resetToPrep').addEventListener('click', () => send('reset-to-prep'));
 })();

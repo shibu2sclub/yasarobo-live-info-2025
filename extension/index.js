@@ -88,20 +88,6 @@ module.exports = (nodecg) => {
                 break;
             }
 
-            // ▼ 追加：reset と同じ挙動（命名で意図を分かりやすく）
-            case 'reset-to-prep': {
-                timerState.value = {
-                    ...s,
-                    stage: 'prep',
-                    running: false,
-                    startEpochMs: 0,
-                    accumulatedMs: 0,
-                    ended: false,
-                    rev: s.rev + 1
-                };
-                break;
-            }
-
             case 'force-to-match': {
                 // 準備中に手動で競技へ。停止状態で待機表示。
                 timerState.value = {

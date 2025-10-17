@@ -33,6 +33,12 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.timer span {
+    font-size: 0.6em;
+    vertical-align: top;
+    opacity: 0.9;
+}
+
 .mode-pill {
     position: absolute;
     top: 10px;
