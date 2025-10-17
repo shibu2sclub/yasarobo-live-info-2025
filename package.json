@@ -18,13 +18,13 @@
         ],
         "graphics": [
             {
-                "file": "main/index.html",
+                "file": "live-main/index.html",
                 "width": 1280,
                 "height": 200,
                 "singleInstance": false
             },
             {
-                "file": "secondary/index.html",
+                "file": "onsite-timer/index.html",
                 "width": 800,
                 "height": 120,
                 "singleInstance": false

@@ -1,15 +1,7 @@
-
-/**
-    * Shared timer renderer:
-    * - Subscribes to Replicant('timerState')
-    * - Renders at centisecond precision (0.01s) using requestAnimationFrame
-    * - DOM update only when centiseconds change
-    */
-(() => {
+(function () {
     const timerState = nodecg.Replicant('timerState');
-
     let state = null;
-    let lastCentis = -1;
+    let lastText = '';
     let serverNowAtLastUpdate = 0;
     let perfNowAtLastUpdate = 0;
 
@@ -17,7 +9,6 @@
         state = newVal;
         serverNowAtLastUpdate = Date.now();
         perfNowAtLastUpdate = performance.now();
-        // Force immediate paint
         tick();
     });
 
@@ -29,7 +20,7 @@
         return Math.max(0, base);
     }
 
-    function formatCentiseconds(ms) {
+    function defaultFormat(ms) {
         const cs = Math.floor(ms / 10);
         const m = Math.floor(cs / 6000);
         const s = Math.floor((cs % 6000) / 100);
@@ -40,34 +31,30 @@
     function currentDisplay() {
         if (!state) return '00:00.00';
         const ms = computeElapsedMs();
+        let formatted = '';
         if (state.mode === 'countdown') {
             const tgt = Math.max(0, state.targetMs || 0);
             const remain = Math.max(0, tgt - ms);
-            return formatCentiseconds(remain);
+            formatted = defaultFormat(remain);
         } else {
-            return formatCentiseconds(ms);
+            formatted = defaultFormat(ms);
         }
+
+        // graphics側が定義していればそれを使う
+        if (typeof window.timerFormatOverride === 'function') {
+            formatted = window.timerFormatOverride(formatted, ms, state);
+        }
+        return formatted;
     }
 
     function tick() {
         const el = document.getElementById('timer');
         if (!el) return requestAnimationFrame(tick);
 
-        // Center sizing — responsive font size based on container
-        const wrap = document.querySelector('.timer-wrap');
-        if (wrap) {
-            const rect = wrap.getBoundingClientRect();
-            // Heuristic: width-driven; 8 chars like "00:00.00"
-            const fontSize = Math.max(24, Math.min(rect.width / 8, rect.height * 0.7));
-            el.style.fontSize = `${fontSize}px`;
-        }
-
         const disp = currentDisplay();
-        // Only update DOM when centiseconds change
-        const cs = disp.slice(-2); // "xx:yy.zz" → "zz"
-        if (cs !== String(lastCentis).padStart(2, '0')) {
+        if (disp !== lastText) {
             el.textContent = disp;
-            lastCentis = Number(cs);
+            lastText = disp;
         }
         requestAnimationFrame(tick);
     }
