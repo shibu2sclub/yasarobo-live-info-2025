@@ -38,10 +38,9 @@ NodeCGで動作する配信画面と管理ツールです。
 このリポジトリを *クローンせずに* 以下を実行
 
 ```powershell
-# cliをインストール
-npm install --global nodecg@latest
-
+# nodecgをインストール
 # プロジェクトを作成
+npm install --global nodecg@latest
 nodecg setup
 
 # bundles配下にこのリポジトリをクローン

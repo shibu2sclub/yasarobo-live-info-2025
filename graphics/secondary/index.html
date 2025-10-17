@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Timer (Secondary)</title>
+    <link rel="stylesheet" href="../shared/style.css" />
+    <style>
+        /* Secondary-specific sizing/look (slimmer) */
+        .timer {
+            padding: 0.15em 0.45em;
+            border-radius: 10px;
+        }
+
+        .mode-pill {
+            background: #ff6aa9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="timer-wrap">
+        <div id="timer" class="timer">00:00.00</div>
+        <div class="mode-pill">SECONDARY</div>
+    </div>
+
+    <script src="/nodecg-api.min.js"></script>
+    <script src="../shared/timer.js"></script>
+    <script src="./script.js"></script>
+</body>
+
+</html>

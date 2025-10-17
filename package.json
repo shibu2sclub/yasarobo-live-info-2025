@@ -1,31 +1,38 @@
 {
-  "name": "yasarobo-live-info-2025",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "nodecg": {
-    "compatibleRange": "*",
-    "dashboardPanels": [
-      {
-        "name": "競技者の切り替え",
-        "title": "競技者の切り替え",
-        "width": 5,
-        "file": "player.html",
-        "workspace": "workspace"
-      }
-    ],
-    "graphics": [
-      {
-        "file": "live-c.html",
-        "width": "1920",
-        "height": "1080"
-      }
-    ]
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": ""
+    "name": "yasarobo-live-info-2025",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "nodecg": {
+        "compatibleRange": "*",
+        "dashboardPanels": [
+            {
+                "name": "timer-control",
+                "title": "Timer Control",
+                "width": 4,
+                "headerColor": "#222",
+                "file": "timer-control/panel.html"
+            }
+        ],
+        "graphics": [
+            {
+                "file": "main/index.html",
+                "width": 1280,
+                "height": 200,
+                "singleInstance": false
+            },
+            {
+                "file": "secondary/index.html",
+                "width": 800,
+                "height": 120,
+                "singleInstance": false
+            }
+        ]
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": ""
 }
