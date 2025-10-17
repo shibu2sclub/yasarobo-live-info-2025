@@ -40,3 +40,14 @@ button.danger {
     font-size: 12px;
     opacity: 0.85;
 }
+
+.cap {
+    margin-left: 8px;
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
