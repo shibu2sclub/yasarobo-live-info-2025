@@ -31,7 +31,7 @@
         nodecg.sendMessage('point-control', { action, ...extra });
     }
 
-    // クリックイベント（保存・UNDOは無し）
+    // クリックイベント
     btnRedOk.addEventListener('click', () => send('add-color', { color: 'red', ok: true }));
     btnRedNg.addEventListener('click', () => send('add-color', { color: 'red', ok: false }));
     btnYOk.addEventListener('click', () => send('add-color', { color: 'yellow', ok: true }));
@@ -48,26 +48,30 @@
         const redCount = (v.red || []).length;
         const yellowCount = (v.yellow || []).length;
         const blueCount = (v.blue || []).length;
+        const freeCount = Number(v.free || 0);
 
         elTotal.textContent = String(v.total || 0);
         elRed.textContent = show(v.red);
         elYellow.textContent = show(v.yellow);
         elBlue.textContent = show(v.blue);
-        elFree.textContent = String(v.free || 0);
+        elFree.textContent = String(freeCount);
         elRev.textContent = String(v.rev || 0);
 
-        // 上限表示 & ボタン有効/無効（各色5球）
-        const CAP = 5;
-        capRed.textContent = `${redCount} / ${CAP}`;
-        capYellow.textContent = `${yellowCount} / ${CAP}`;
-        capBlue.textContent = `${blueCount} / ${CAP}`;
+        // 上限表示（色は5）＋ ボタン有効/無効
+        const COLOR_CAP = 5;
+        capRed.textContent = `${redCount} / ${COLOR_CAP}`;
+        capYellow.textContent = `${yellowCount} / ${COLOR_CAP}`;
+        capBlue.textContent = `${blueCount} / ${COLOR_CAP}`;
 
-        const redFull = redCount >= CAP;
-        const yellowFull = yellowCount >= CAP;
-        const blueFull = blueCount >= CAP;
+        const redFull = redCount >= COLOR_CAP;
+        const yellowFull = yellowCount >= COLOR_CAP;
+        const blueFull = blueCount >= COLOR_CAP;
 
         btnRedOk.disabled = btnRedNg.disabled = redFull;
         btnYOk.disabled = btnYNg.disabled = yellowFull;
         btnBOk.disabled = btnBNg.disabled = blueFull;
+
+        // ★ 自由ボールは1回のみ
+        btnFree.disabled = freeCount >= 1;
     });
 })();
