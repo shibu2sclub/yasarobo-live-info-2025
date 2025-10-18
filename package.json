@@ -35,6 +35,13 @@
                 "width": 4,
                 "headerColor": "#222",
                 "file": "results/panel.html"
+            },
+            {
+                "name": "retry",
+                "title": "Retry",
+                "width": 3,
+                "headerColor": "#222",
+                "file": "retry/panel.html"
             }
         ],
         "graphics": [

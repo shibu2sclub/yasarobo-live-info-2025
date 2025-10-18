@@ -1,21 +1,15 @@
 'use strict';
 
-/**
- * 競技者管理：
- * - playerRoster: [{id, robot}, ...] 永続
- * - currentPlayer: {id, robot} | null 一時
- * - メッセージ: add/remove/clear-roster/select/clear-current/bulk-set
- *   - bulk-set: { mode: 'replace'|'upsert', rows: [{id,robot},...] }
- */
 module.exports = (nodecg) => {
     /**
      * @typedef {{ id: string, robot: string }} PlayerEntry
      * @typedef {{ id: string, robot: string } | null} CurrentPlayer
      */
 
-    const timerState = nodecg.Replicant('timerState');   // from timer.js
-    const pointState = nodecg.Replicant('pointState');   // from points.js
-
+    // 他Replicant参照
+    const timerState = nodecg.Replicant('timerState');
+    const pointState = nodecg.Replicant('pointState');
+    const retryCount = nodecg.Replicant('retryCount'); // ★ 追加
 
     /** @type {import('nodecg/types/replicant').Replicant<PlayerEntry[]>} */
     const playerRoster = nodecg.Replicant('playerRoster', {
@@ -63,9 +57,8 @@ module.exports = (nodecg) => {
                 const p = (playerRoster.value || []).find(x => x.id === id) || null;
                 currentPlayer.value = p ? { id: p.id, robot: p.robot } : null;
 
-                // ▼ 追加：プレイヤー選択時にタイマー＆得点をリセット
                 if (p) {
-                    // タイマーを「準備満タン・停止・stage=prep・ended=false」に戻す
+                    // タイマーを準備満タン停止へ
                     const s = timerState.value || {};
                     timerState.value = {
                         ...s,
@@ -77,7 +70,7 @@ module.exports = (nodecg) => {
                         rev: (s?.rev || 0) + 1
                     };
 
-                    // 得点をクリア
+                    // 得点クリア
                     const ps = pointState.value || {};
                     pointState.value = {
                         red: [],
@@ -87,6 +80,10 @@ module.exports = (nodecg) => {
                         total: 0,
                         rev: (ps?.rev || 0) + 1
                     };
+
+                    // ★ リトライ数クリア
+                    const rc = retryCount.value || { count: 0, rev: 0 };
+                    retryCount.value = { count: 0, rev: (rc.rev || 0) + 1 };
                 }
                 break;
             }
@@ -97,7 +94,6 @@ module.exports = (nodecg) => {
             }
 
             case 'bulk-set': {
-                // { mode: 'replace'|'upsert', rows: [{id,robot},...] }
                 const mode = msg.mode === 'upsert' ? 'upsert' : 'replace';
                 const rows = Array.isArray(msg.rows) ? msg.rows : [];
                 const sanitized = rows
@@ -113,7 +109,6 @@ module.exports = (nodecg) => {
                     const map = new Map((playerRoster.value || []).map(p => [p.id, p]));
                     sanitized.forEach(p => map.set(p.id, p));
                     playerRoster.value = Array.from(map.values());
-                    // current は触らない
                 }
                 break;
             }
