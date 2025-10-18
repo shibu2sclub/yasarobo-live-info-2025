@@ -13,6 +13,10 @@ module.exports = (nodecg) => {
      * @typedef {{ id: string, robot: string } | null} CurrentPlayer
      */
 
+    const timerState = nodecg.Replicant('timerState');   // from timer.js
+    const pointState = nodecg.Replicant('pointState');   // from points.js
+
+
     /** @type {import('nodecg/types/replicant').Replicant<PlayerEntry[]>} */
     const playerRoster = nodecg.Replicant('playerRoster', {
         persistent: true,
@@ -58,6 +62,32 @@ module.exports = (nodecg) => {
                 const id = String(msg.id || '').trim();
                 const p = (playerRoster.value || []).find(x => x.id === id) || null;
                 currentPlayer.value = p ? { id: p.id, robot: p.robot } : null;
+
+                // ▼ 追加：プレイヤー選択時にタイマー＆得点をリセット
+                if (p) {
+                    // タイマーを「準備満タン・停止・stage=prep・ended=false」に戻す
+                    const s = timerState.value || {};
+                    timerState.value = {
+                        ...s,
+                        stage: 'prep',
+                        running: false,
+                        startEpochMs: 0,
+                        accumulatedMs: 0,
+                        ended: false,
+                        rev: (s?.rev || 0) + 1
+                    };
+
+                    // 得点をクリア
+                    const ps = pointState.value || {};
+                    pointState.value = {
+                        red: [],
+                        yellow: [],
+                        blue: [],
+                        free: 0,
+                        total: 0,
+                        rev: (ps?.rev || 0) + 1
+                    };
+                }
                 break;
             }
 

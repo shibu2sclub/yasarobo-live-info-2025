@@ -50,3 +50,13 @@ body {
     border-radius: 999px;
     opacity: 0.9;
 }
+
+#points {
+    margin-top: 4px;
+}
+
+#lastResult {
+    margin-top: 2px;
+    font-size: 14px;
+    opacity: 0.9;
+}
