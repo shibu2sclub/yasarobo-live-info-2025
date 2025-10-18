@@ -17,16 +17,15 @@
  *   blueCorrect: number, blueWrong: number,
  *   free: number,
  *   total: number,
- *   // 時間情報
- *   stageEnded: 'match' | 'manual',
- *   prepRemainingMs: number,   // 保存時点の準備残（通常0）
- *   matchRemainingMs: number,  // 保存時点の競技残（タイムアップなら0）
- *   // 参考：大会やヒート識別など拡張フィールドは後で追加可
+ *   // 時間情報（競技時間の残りのみを保存）
+ *   matchRemainingMs: number,  // 競技時間の残り（prep中に保存した場合は matchMs を保存）
+ *   // 保存理由
+ *   stageEnded: 'match' | 'manual'
  * }
  */
 
 module.exports = (nodecg) => {
-    // 既存の Replicant を購読（読取専用）
+    // 他モジュールの Replicant を購読（読取専用）
     const timerState = nodecg.Replicant('timerState');     // from timer.js
     const pointState = nodecg.Replicant('pointState');     // from points.js
     const current = nodecg.Replicant('currentPlayer');  // from player.js
@@ -37,11 +36,12 @@ module.exports = (nodecg) => {
         defaultValue: { byPlayer: {}, rev: 0 }
     });
 
-    // 内部状態：ended の立ち上がり縁を検出
+    // 内部状態：ended の立ち上がり縁を検出（タイムアップで自動保存）
     let lastEnded = false;
 
     // 便利関数
-    const nowId = () => new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14) + '-' + Date.now();
+    const nowId = () =>
+        new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14) + '-' + Date.now();
     const safeArr = (x) => Array.isArray(x) ? x : [];
 
     function countCorrectWrong(arrBool) {
@@ -51,6 +51,12 @@ module.exports = (nodecg) => {
         return [ok, ng];
     }
 
+    /**
+     * 現在の状態から保存用エントリを構築。
+     * - 保存する時間は「競技時間の残り時間」のみ。
+     *   - stage === 'match' のとき：matchMs - 経過
+     *   - stage === 'prep' のとき：matchMs（フル）
+     */
     function buildEntry(stageEnded = 'match') {
         const p = current.value;
         if (!p || !p.id) return null;
@@ -62,16 +68,18 @@ module.exports = (nodecg) => {
         const free = Number(pointState.value?.free || 0);
         const total = Number(pointState.value?.total || 0);
 
-        // 時間
-        const s = timerState.value;
-        const prepMs = s?.prepMs ?? 0;
-        const matchMs = s?.matchMs ?? 0;
+        // 時間（競技の残りのみ）
+        const s = timerState.value || {};
+        const matchMs = Number.isFinite(s.matchMs) ? s.matchMs : 0;
 
-        // 現在の残り（描画ほど厳密でなくてOK：保存用途）
-        const t = Date.now();
-        const elapsed = (s?.accumulatedMs || 0) + (s?.running ? (t - (s?.startEpochMs || 0)) : 0);
-        const stageDur = s?.stage === 'prep' ? prepMs : matchMs;
-        const rem = Math.max(0, stageDur - elapsed);
+        let matchRemainingMs = matchMs;
+        if (s.stage === 'match') {
+            const t = Date.now();
+            const elapsed = (s.accumulatedMs || 0) + (s.running ? (t - (s.startEpochMs || 0)) : 0);
+            matchRemainingMs = Math.max(0, matchMs - elapsed);
+        } else if (s.stage === 'prep') {
+            matchRemainingMs = Math.max(0, matchMs);
+        }
 
         const entry = {
             id: nowId(),
@@ -83,9 +91,8 @@ module.exports = (nodecg) => {
             blueCorrect: bOK, blueWrong: bNG,
             free,
             total,
-            stageEnded, // 'match' or 'manual'
-            prepRemainingMs: s?.stage === 'prep' ? rem : (s ? Math.max(0, s.prepMs) : 0),
-            matchRemainingMs: s?.stage === 'match' ? rem : (s ? Math.max(0, s.matchMs - (s.stage === 'prep' ? 0 : elapsed)) : 0),
+            matchRemainingMs,
+            stageEnded
         };
         return entry;
     }
@@ -103,21 +110,25 @@ module.exports = (nodecg) => {
     timerState.on('change', (s) => {
         const ended = !!s?.ended;
         if (!lastEnded && ended) {
-            const entry = buildEntry('match'); // タイムアップ起因
+            const entry = buildEntry('match');
             appendResult(entry);
-            nodecg.log.info(`[results] auto-saved for player ${entry?.playerId ?? '(none)'} total=${entry?.total ?? '?'}`);
+            nodecg.log.info(
+                `[results] auto-saved (player=${entry?.playerId ?? '(none)'} total=${entry?.total ?? '?'}, matchRem=${entry?.matchRemainingMs ?? '?'})`
+            );
         }
         lastEnded = ended;
     });
 
-    // ② 手動保存（任意）：pointパネル等から明示保存
+    // ② 手動保存（任意）：dashboardから明示保存
     nodecg.listenFor('results:save-current', (msg) => {
         const entry = buildEntry(msg?.reason === 'manual' ? 'manual' : 'match');
         appendResult(entry);
-        nodecg.log.info(`[results] manual-saved for player ${entry?.playerId ?? '(none)'} total=${entry?.total ?? '?'}`);
+        nodecg.log.info(
+            `[results] manual-saved (player=${entry?.playerId ?? '(none)'} total=${entry?.total ?? '?'}, matchRem=${entry?.matchRemainingMs ?? '?'})`
+        );
     });
 
-    // ③ 過去結果の削除/Undo（任意実装）
+    // ③ 過去結果の削除/Undo（任意）
     nodecg.listenFor('results:undo-last', (msg) => {
         const playerId = String(msg?.playerId || current.value?.id || '').trim();
         if (!playerId) return;
@@ -127,7 +138,7 @@ module.exports = (nodecg) => {
             arr.pop();
             store.byPlayer[playerId] = arr;
             resultsStore.value = { ...store, rev: (store.rev || 0) + 1 };
-            nodecg.log.info(`[results] undo last for player ${playerId}`);
+            nodecg.log.info(`[results] undo last (player=${playerId})`);
         }
     });
 };
