@@ -11,17 +11,18 @@
     <div class="wrap">
         <h2>Point</h2>
 
-        <!-- 既存の構成そのまま。rowごとにカウンタを追加 -->
         <div class="row">
             <button data-act="red-correct">赤 正解(+3)</button>
             <button data-act="red-wrong">赤 誤り(+1)</button>
             <span id="capRed" class="cap">0 / 5</span>
         </div>
+
         <div class="row">
             <button data-act="yellow-correct">黄 正解(+3)</button>
             <button data-act="yellow-wrong">黄 誤り(+1)</button>
             <span id="capYellow" class="cap">0 / 5</span>
         </div>
+
         <div class="row">
             <button data-act="blue-correct">青 正解(+3)</button>
             <button data-act="blue-wrong">青 誤り(+1)</button>
@@ -40,12 +41,6 @@
             <div><strong>青:</strong> <span id="stBlue">[]</span></div>
             <div><strong>自由:</strong> <span id="stFree">0</span></div>
             <div><strong>rev:</strong> <span id="stRev">0</span></div>
-        </div>
-
-        <div class="row">
-            <!-- point/panel.html の適当な row に -->
-            <button id="saveResult">保存</button>
-            <button id="undoResult">UNDO</button>
         </div>
     </div>
 

@@ -4,6 +4,7 @@
     const q = (s) => document.querySelector(s);
     const $ = (sel) => Array.from(document.querySelectorAll(sel));
 
+    // ステータス表示要素
     const elTotal = q('#stTotal');
     const elRed = q('#stRed');
     const elYellow = q('#stYellow');
@@ -11,37 +12,39 @@
     const elFree = q('#stFree');
     const elRev = q('#stRev');
 
-    // ★ 追加: 上限表示用
+    // 上限表示
     const capRed = q('#capRed');
     const capYellow = q('#capYellow');
     const capBlue = q('#capBlue');
+
+    // ボタン
+    const btnRedOk = $('[data-act="red-correct"]')[0];
+    const btnRedNg = $('[data-act="red-wrong"]')[0];
+    const btnYOk = $('[data-act="yellow-correct"]')[0];
+    const btnYNg = $('[data-act="yellow-wrong"]')[0];
+    const btnBOk = $('[data-act="blue-correct"]')[0];
+    const btnBNg = $('[data-act="blue-wrong"]')[0];
+    const btnFree = $('[data-act="free"]')[0];
+    const btnReset = q('#reset');
 
     function send(action, extra) {
         nodecg.sendMessage('point-control', { action, ...extra });
     }
 
-    // ボタン群
-    const btnRedOk = $('[data-act="red-correct"]')[0];
-    const btnRedNg = $('[data-act="red-wrong"]')[0];
-    const btnYelOk = $('[data-act="yellow-correct"]')[0];
-    const btnYelNg = $('[data-act="yellow-wrong"]')[0];
-    const btnBluOk = $('[data-act="blue-correct"]')[0];
-    const btnBluNg = $('[data-act="blue-wrong"]')[0];
-    const btnFree = $('[data-act="free"]')[0];
-    const btnReset = q('#reset');
-
+    // クリックイベント（保存・UNDOは無し）
     btnRedOk.addEventListener('click', () => send('add-color', { color: 'red', ok: true }));
     btnRedNg.addEventListener('click', () => send('add-color', { color: 'red', ok: false }));
-    btnYelOk.addEventListener('click', () => send('add-color', { color: 'yellow', ok: true }));
-    btnYelNg.addEventListener('click', () => send('add-color', { color: 'yellow', ok: false }));
-    btnBluOk.addEventListener('click', () => send('add-color', { color: 'blue', ok: true }));
-    btnBluNg.addEventListener('click', () => send('add-color', { color: 'blue', ok: false }));
+    btnYOk.addEventListener('click', () => send('add-color', { color: 'yellow', ok: true }));
+    btnYNg.addEventListener('click', () => send('add-color', { color: 'yellow', ok: false }));
+    btnBOk.addEventListener('click', () => send('add-color', { color: 'blue', ok: true }));
+    btnBNg.addEventListener('click', () => send('add-color', { color: 'blue', ok: false }));
     btnFree.addEventListener('click', () => send('add-free'));
     btnReset.addEventListener('click', () => send('reset'));
 
     // 表示更新
     ps.on('change', (v) => {
         const show = (arr) => `[${(arr || []).map(x => x ? '○' : '×').join(', ')}]`;
+
         const redCount = (v.red || []).length;
         const yellowCount = (v.yellow || []).length;
         const blueCount = (v.blue || []).length;
@@ -53,28 +56,18 @@
         elFree.textContent = String(v.free || 0);
         elRev.textContent = String(v.rev || 0);
 
-        // ★ 追加: 上限表示（5球）
+        // 上限表示 & ボタン有効/無効（各色5球）
         const CAP = 5;
         capRed.textContent = `${redCount} / ${CAP}`;
         capYellow.textContent = `${yellowCount} / ${CAP}`;
         capBlue.textContent = `${blueCount} / ${CAP}`;
 
-        // ★ 追加: 視覚的フィードバック（上限到達でボタンを無効化）
         const redFull = redCount >= CAP;
         const yellowFull = yellowCount >= CAP;
         const blueFull = blueCount >= CAP;
 
         btnRedOk.disabled = btnRedNg.disabled = redFull;
-        btnYelOk.disabled = btnYelNg.disabled = yellowFull;
-        btnBluOk.disabled = btnBluNg.disabled = blueFull;
+        btnYOk.disabled = btnYNg.disabled = yellowFull;
+        btnBOk.disabled = btnBNg.disabled = blueFull;
     });
-
-    // point/panel.js
-    q('#saveResult').addEventListener('click', () =>
-        nodecg.sendMessage('results:save-current', { reason: 'manual' })
-    );
-    q('#undoResult').addEventListener('click', () =>
-        nodecg.sendMessage('results:undo-last', {}) // playerId 省略→currentPlayerに対して
-    );
-
 })();

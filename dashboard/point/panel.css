@@ -33,12 +33,9 @@ button.danger {
     border-color: #611;
 }
 
-.status {
-    margin-top: 8px;
-    display: grid;
-    gap: 4px;
-    font-size: 12px;
-    opacity: 0.85;
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .cap {
@@ -47,7 +44,10 @@ button.danger {
     opacity: 0.85;
 }
 
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+.status {
+    margin-top: 8px;
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+    opacity: 0.85;
 }
