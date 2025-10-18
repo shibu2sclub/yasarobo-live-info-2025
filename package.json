@@ -28,6 +28,13 @@
                 "width": 4,
                 "headerColor": "#222",
                 "file": "player/panel.html"
+            },
+            {
+                "name": "results",
+                "title": "Results",
+                "width": 4,
+                "headerColor": "#222",
+                "file": "results/panel.html"
             }
         ],
         "graphics": [

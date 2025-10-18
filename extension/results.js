@@ -1,14 +1,20 @@
 'use strict';
 
 /**
- * resultsStore（永続）：
- * - byPlayer: { [playerId: string]: ResultEntry[] }
- * - rev: number
+ * attemptsStore（永続）：
+ * byPlayer: {
+ *   [playerId]: {
+ *     attempt1: ResultEntry | null,
+ *     attempt2: ResultEntry | null,
+ *     best: { total: number, matchRemainingMs: number, from: 1|2 } | null
+ *   }
+ * }
+ * rev: number
  *
  * ResultEntry:
  * {
- *   id: string,                // 一意ID（時刻ベース）
- *   ts: number,                // 保存タイムスタンプ (ms since epoch)
+ *   id: string,                // 一意ID
+ *   ts: number,                // 保存時刻(ms since epoch)
  *   playerId: string,
  *   robot: string,
  *   // 得点内訳と合計
@@ -17,71 +23,63 @@
  *   blueCorrect: number, blueWrong: number,
  *   free: number,
  *   total: number,
- *   // 時間情報（競技時間の残りのみを保存）
- *   matchRemainingMs: number,  // 競技時間の残り（prep中に保存した場合は matchMs を保存）
- *   // 保存理由
- *   stageEnded: 'match' | 'manual'
+ *   // 時間（競技の残りのみ）
+ *   matchRemainingMs: number
  * }
+ *
+ * メッセージ:
+ * - results:save-attempt   { which: 1|2, reason?: 'manual' }
+ * - results:reset-attempt  { which: 1|2 }
+ * - results:reset-both     {}
  */
 
 module.exports = (nodecg) => {
-    // 他モジュールの Replicant を購読（読取専用）
+    // 既存 Replicant を参照
     const timerState = nodecg.Replicant('timerState');     // from timer.js
     const pointState = nodecg.Replicant('pointState');     // from points.js
     const current = nodecg.Replicant('currentPlayer');  // from player.js
 
-    /** @type {import('nodecg/types/replicant').Replicant<{byPlayer: Record<string, any[]>, rev: number}>} */
-    const resultsStore = nodecg.Replicant('resultsStore', {
+    /** @type {import('nodecg/types/replicant').Replicant<{byPlayer: Record<string, {attempt1:any|null,attempt2:any|null,best:any|null}>, rev:number}>} */
+    const attemptsStore = nodecg.Replicant('attemptsStore', {
         persistent: true,
         defaultValue: { byPlayer: {}, rev: 0 }
     });
 
-    // 内部状態：ended の立ち上がり縁を検出（タイムアップで自動保存）
-    let lastEnded = false;
-
-    // 便利関数
+    // ユーティリティ
     const nowId = () =>
         new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14) + '-' + Date.now();
     const safeArr = (x) => Array.isArray(x) ? x : [];
-
-    function countCorrectWrong(arrBool) {
-        const arr = safeArr(arrBool);
+    const countOKNG = (arr) => {
         let ok = 0, ng = 0;
-        for (const v of arr) (v ? ok++ : ng++);
+        for (const v of safeArr(arr)) (v ? ok++ : ng++);
         return [ok, ng];
-    }
+    };
 
-    /**
-     * 現在の状態から保存用エントリを構築。
-     * - 保存する時間は「競技時間の残り時間」のみ。
-     *   - stage === 'match' のとき：matchMs - 経過
-     *   - stage === 'prep' のとき：matchMs（フル）
-     */
-    function buildEntry(stageEnded = 'match') {
+    function buildEntry() {
         const p = current.value;
         if (!p || !p.id) return null;
 
         // 得点
-        const [rOK, rNG] = countCorrectWrong(pointState.value?.red);
-        const [yOK, yNG] = countCorrectWrong(pointState.value?.yellow);
-        const [bOK, bNG] = countCorrectWrong(pointState.value?.blue);
+        const [rOK, rNG] = countOKNG(pointState.value?.red);
+        const [yOK, yNG] = countOKNG(pointState.value?.yellow);
+        const [bOK, bNG] = countOKNG(pointState.value?.blue);
         const free = Number(pointState.value?.free || 0);
         const total = Number(pointState.value?.total || 0);
 
-        // 時間（競技の残りのみ）
+        // 競技残（match only）
         const s = timerState.value || {};
         const matchMs = Number.isFinite(s.matchMs) ? s.matchMs : 0;
-
         let matchRemainingMs = matchMs;
         if (s.stage === 'match') {
             const t = Date.now();
             const elapsed = (s.accumulatedMs || 0) + (s.running ? (t - (s.startEpochMs || 0)) : 0);
             matchRemainingMs = Math.max(0, matchMs - elapsed);
-        } else if (s.stage === 'prep') {
+        } else {
+            // 準備中保存 → 競技は未開始なのでフル残
             matchRemainingMs = Math.max(0, matchMs);
         }
 
-        const entry = {
+        return {
             id: nowId(),
             ts: Date.now(),
             playerId: p.id,
@@ -91,54 +89,81 @@ module.exports = (nodecg) => {
             blueCorrect: bOK, blueWrong: bNG,
             free,
             total,
-            matchRemainingMs,
-            stageEnded
+            matchRemainingMs
         };
-        return entry;
     }
 
-    function appendResult(entry) {
+    function computeBest(a1, a2) {
+        if (!a1 && !a2) return null;
+        if (a1 && !a2) return { total: a1.total, matchRemainingMs: a1.matchRemainingMs, from: 1 };
+        if (!a1 && a2) return { total: a2.total, matchRemainingMs: a2.matchRemainingMs, from: 2 };
+        // 両方あり：得点が高い方、同点なら残が多い方
+        if (a1.total !== a2.total) {
+            return (a1.total > a2.total)
+                ? { total: a1.total, matchRemainingMs: a1.matchRemainingMs, from: 1 }
+                : { total: a2.total, matchRemainingMs: a2.matchRemainingMs, from: 2 };
+        }
+        // 同点 → 残が多い方が“良いタイム”
+        if (a1.matchRemainingMs !== a2.matchRemainingMs) {
+            return (a1.matchRemainingMs > a2.matchRemainingMs)
+                ? { total: a1.total, matchRemainingMs: a1.matchRemainingMs, from: 1 }
+                : { total: a2.total, matchRemainingMs: a2.matchRemainingMs, from: 2 };
+        }
+        // 完全同値 → 1を優先
+        return { total: a1.total, matchRemainingMs: a1.matchRemainingMs, from: 1 };
+    }
+
+    function setAttempt(which, entry) {
+        const p = current.value;
+        if (!p || !p.id) return;
+
+        const store = attemptsStore.value || { byPlayer: {}, rev: 0 };
+        const rec = store.byPlayer[p.id] || { attempt1: null, attempt2: null, best: null };
+
+        if (which === 1) rec.attempt1 = entry;
+        else if (which === 2) rec.attempt2 = entry;
+
+        rec.best = computeBest(rec.attempt1, rec.attempt2);
+        store.byPlayer[p.id] = rec;
+        attemptsStore.value = { ...store, rev: (store.rev || 0) + 1 };
+
+        nodecg.log.info(`[attempts] set attempt${which} for ${p.id} total=${entry?.total ?? '—'} rem=${entry?.matchRemainingMs ?? '—'} bestFrom=${rec.best?.from ?? '—'}`);
+    }
+
+    function resetAttempt(which) {
+        const p = current.value;
+        if (!p || !p.id) return;
+
+        const store = attemptsStore.value || { byPlayer: {}, rev: 0 };
+        const rec = store.byPlayer[p.id] || { attempt1: null, attempt2: null, best: null };
+
+        if (which === 1) rec.attempt1 = null;
+        else if (which === 2) rec.attempt2 = null;
+
+        rec.best = computeBest(rec.attempt1, rec.attempt2);
+        store.byPlayer[p.id] = rec;
+        attemptsStore.value = { ...store, rev: (store.rev || 0) + 1 };
+
+        nodecg.log.info(`[attempts] reset attempt${which} for ${p.id}`);
+    }
+
+    // メッセージAPI
+    nodecg.listenFor('results:save-attempt', (msg) => {
+        const which = Number(msg?.which);
+        if (which !== 1 && which !== 2) return;
+        const entry = buildEntry();
         if (!entry) return;
-        const store = resultsStore.value || { byPlayer: {}, rev: 0 };
-        const arr = store.byPlayer[entry.playerId] || [];
-        arr.push(entry);
-        store.byPlayer[entry.playerId] = arr;
-        resultsStore.value = { ...store, rev: (store.rev || 0) + 1 };
-    }
-
-    // ① 自動保存：競技終了（ended false→true）で保存
-    timerState.on('change', (s) => {
-        const ended = !!s?.ended;
-        if (!lastEnded && ended) {
-            const entry = buildEntry('match');
-            appendResult(entry);
-            nodecg.log.info(
-                `[results] auto-saved (player=${entry?.playerId ?? '(none)'} total=${entry?.total ?? '?'}, matchRem=${entry?.matchRemainingMs ?? '?'})`
-            );
-        }
-        lastEnded = ended;
+        setAttempt(which, entry);
     });
 
-    // ② 手動保存（任意）：dashboardから明示保存
-    nodecg.listenFor('results:save-current', (msg) => {
-        const entry = buildEntry(msg?.reason === 'manual' ? 'manual' : 'match');
-        appendResult(entry);
-        nodecg.log.info(
-            `[results] manual-saved (player=${entry?.playerId ?? '(none)'} total=${entry?.total ?? '?'}, matchRem=${entry?.matchRemainingMs ?? '?'})`
-        );
+    nodecg.listenFor('results:reset-attempt', (msg) => {
+        const which = Number(msg?.which);
+        if (which !== 1 && which !== 2) return;
+        resetAttempt(which);
     });
 
-    // ③ 過去結果の削除/Undo（任意）
-    nodecg.listenFor('results:undo-last', (msg) => {
-        const playerId = String(msg?.playerId || current.value?.id || '').trim();
-        if (!playerId) return;
-        const store = resultsStore.value || { byPlayer: {}, rev: 0 };
-        const arr = store.byPlayer[playerId] || [];
-        if (arr.length > 0) {
-            arr.pop();
-            store.byPlayer[playerId] = arr;
-            resultsStore.value = { ...store, rev: (store.rev || 0) + 1 };
-            nodecg.log.info(`[results] undo last (player=${playerId})`);
-        }
+    nodecg.listenFor('results:reset-both', () => {
+        resetAttempt(1);
+        resetAttempt(2);
     });
 };
