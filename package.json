@@ -23,13 +23,6 @@
                 "file": "point/panel.html"
             },
             {
-                "name": "player",
-                "title": "Player",
-                "width": 4,
-                "headerColor": "#222",
-                "file": "player/panel.html"
-            },
-            {
                 "name": "results",
                 "title": "Results",
                 "width": 4,
@@ -42,6 +35,20 @@
                 "width": 3,
                 "headerColor": "#222",
                 "file": "retry/panel.html"
+            },
+            {
+                "name": "player-roster",
+                "title": "Player (Roster / CSV)",
+                "width": 5,
+                "headerColor": "#222",
+                "file": "player-roster/panel.html"
+            },
+            {
+                "name": "player-select",
+                "title": "Player (Select)",
+                "width": 3,
+                "headerColor": "#222",
+                "file": "player-select/panel.html"
             }
         ],
         "graphics": [

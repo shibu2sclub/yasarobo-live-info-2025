@@ -13,7 +13,7 @@ h2 {
     gap: 8px;
     align-items: center;
     margin: 8px 0;
-    width: 100%;
+    flex-wrap: wrap;
 }
 
 input[type="text"] {
@@ -35,19 +35,26 @@ button:hover {
     filter: brightness(1.1);
 }
 
+button.warn {
+    background: #a66;
+    border-color: #533;
+}
+
 button.danger {
     background: #b22;
     border-color: #611;
 }
 
-.status {
-    margin-top: 8px;
-    display: grid;
-    gap: 4px;
+.hint {
     font-size: 12px;
-    opacity: 0.85;
+    opacity: .8;
+    margin: -4px 0 6px 0;
 }
 
-select#list {
-    height: 180px;
+.count {
+    margin-left: auto;
+}
+
+.list-wrap {
+    margin-top: 6px;
 }
