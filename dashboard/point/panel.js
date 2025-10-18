@@ -68,4 +68,13 @@
         btnYelOk.disabled = btnYelNg.disabled = yellowFull;
         btnBluOk.disabled = btnBluNg.disabled = blueFull;
     });
+
+    // point/panel.js
+    q('#saveResult').addEventListener('click', () =>
+        nodecg.sendMessage('results:save-current', { reason: 'manual' })
+    );
+    q('#undoResult').addEventListener('click', () =>
+        nodecg.sendMessage('results:undo-last', {}) // playerId 省略→currentPlayerに対して
+    );
+
 })();
