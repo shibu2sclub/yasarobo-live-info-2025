@@ -10,6 +10,7 @@
  *     nameDashboard?: string,
  *     nameGraphics?: string,
  *     nameGraphicsShortEn?: string,
+ *     themeColor?: string, // ← 追加: "#RRGGBB"
  *     attemptsCount?: number,
  *     retryAttemptsCount?: number,
  *     items: Array<{ key:string, labelDashboard:string, labelGraphics:string, pointsCorrect:number, pointsWrong:number, cap:number }>
@@ -27,6 +28,9 @@
  */
 
 module.exports = (nodecg) => {
+    const DEFAULT_COLOR = '#AF1E21';
+    const HEX6 = /^#([0-9a-fA-F]{6})$/;
+
     const rulesLibrary = nodecg.Replicant('rulesLibrary', {
         persistent: true,
         defaultValue: { items: [], rev: 0 }
@@ -42,6 +46,7 @@ module.exports = (nodecg) => {
             nameDashboard: '標準ルール',
             nameGraphics: 'STANDARD RULE',
             nameGraphicsShortEn: 'STD',
+            themeColor: DEFAULT_COLOR,
             attemptsCount: 2,
             retryAttemptsCount: 3,
             items: [
@@ -59,12 +64,19 @@ module.exports = (nodecg) => {
 
     function normalizeRule(obj) {
         if (!obj || typeof obj !== 'object') throw new Error('rule JSON must be object');
+
         const out = {};
         out.nameDashboard = String(obj.nameDashboard ?? '');
         out.nameGraphics = String(obj.nameGraphics ?? '');
         out.nameGraphicsShortEn = String(obj.nameGraphicsShortEn ?? '');
+
+        // themeColor: #RRGGBB で検証。無効値はデフォルトに丸める
+        const col = String(obj.themeColor ?? DEFAULT_COLOR).trim();
+        out.themeColor = HEX6.test(col) ? col.toUpperCase() : DEFAULT_COLOR;
+
         const ac = Number(obj.attemptsCount ?? 2);
         out.attemptsCount = (Number.isFinite(ac) && ac >= 1) ? Math.floor(ac) : 2;
+
         const rc = Number(obj.retryAttemptsCount ?? 3);
         out.retryAttemptsCount = (Number.isFinite(rc) && rc >= 0) ? Math.floor(rc) : 3;
 
@@ -88,7 +100,7 @@ module.exports = (nodecg) => {
         const lib = rulesLibrary.value || { items: [] };
         const doc = (lib.items || []).find(x => x.id === id) || null;
         if (!doc) return false;
-        rules.value = deepClone(doc.rule);
+        rules.value = deepClone(doc.rule); // ← themeColor を含む全項目を反映
         rulesActiveKey.value = id;
         return true;
     }

@@ -1,8 +1,8 @@
 {
-    "nameDashboard": "マスターズコース",
-    "nameGraphics": "マスターズコース",
-    "nameGraphicsShortEn": "Masters",
-    "themeColor": "#B58910",
+    "nameDashboard": "やさしいコース",
+    "nameGraphics": "やさしいコース",
+    "nameGraphicsShortEn": "Yasashii",
+    "themeColor": "#192E54",
     "attemptsCount": 2,
     "retryAttemptsCount": 3,
     "items": [
@@ -29,22 +29,6 @@
             "pointsCorrect": 6,
             "pointsWrong": 1,
             "cap": 3
-        },
-        {
-            "key": "alumican",
-            "labelDashboard": "アルミ缶",
-            "labelGraphics": "Can (Aluminum)",
-            "pointsCorrect": 10,
-            "pointsWrong": 1,
-            "cap": 1
-        },
-        {
-            "key": "pet",
-            "labelDashboard": "ウォーターボトル",
-            "labelGraphics": "Water Bottle",
-            "pointsCorrect": 15,
-            "pointsWrong": 0,
-            "cap": 1
         },
         {
             "key": "free",

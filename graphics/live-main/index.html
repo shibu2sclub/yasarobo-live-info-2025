@@ -37,6 +37,22 @@
             font-size: 14px;
             opacity: 0.95;
         }
+
+        .rule-pill {
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            color: #fff;
+            /* 常に白文字 */
+            background: #AF1E21;
+            /* 初期色（上書きされる） */
+            font-size: 14px;
+            opacity: 0.95;
+        }
     </style>
 </head>
 
@@ -45,11 +61,12 @@
         <div id="timer" class="timer">0:00<span> 00</span></div>
         <div id="status" class="mode-pill">------</div>
 
+        + <!-- ルール名ピル（英語略称） -->
+        + <div id="rulePill" class="rule-pill" style="display:none;">STD</div>
+
         <div id="player">ID: — | ROBOT: —</div>
         <div id="points">SCORE: 0</div>
         <div id="retryLive">RETRY: 0</div>
-
-        <!-- ▼ attempts-display.js が中身を動的生成します -->
         <div id="attemptsWrap" class="attempts"></div>
     </div>
 
@@ -59,7 +76,10 @@
     <script src="../shared/player-display.js"></script>
     <script src="../shared/attempts-display.js"></script>
     <script src="../shared/retry-display.js"></script>
+    +
+    <script src="../shared/rule-pill.js"></script>
     <script src="./script.js"></script>
+
 </body>
 
 </html>
