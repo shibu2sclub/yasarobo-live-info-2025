@@ -16,11 +16,27 @@
                 "file": "timer-control/panel.html"
             },
             {
+                "name": "timer-control_",
+                "title": "Timer Control",
+                "width": 6,
+                "headerColor": "#222",
+                "file": "timer-control/panel.html",
+                "workspace": "Referee"
+            },
+            {
                 "name": "point",
                 "title": "Point",
                 "width": 4,
                 "headerColor": "#222",
                 "file": "point/panel.html"
+            },
+            {
+                "name": "point_",
+                "title": "Point",
+                "width": 4,
+                "headerColor": "#222",
+                "file": "point/panel.html",
+                "workspace": "Committee"
             },
             {
                 "name": "results",
@@ -30,11 +46,27 @@
                 "file": "results/panel.html"
             },
             {
+                "name": "results_",
+                "title": "Results",
+                "width": 4,
+                "headerColor": "#222",
+                "file": "results/panel.html",
+                "workspace": "Committee"
+            },
+            {
                 "name": "retry",
                 "title": "Retry",
                 "width": 3,
                 "headerColor": "#222",
                 "file": "retry/panel.html"
+            },
+            {
+                "name": "retry_",
+                "title": "Retry",
+                "width": 3,
+                "headerColor": "#222",
+                "file": "retry/panel.html",
+                "workspace": "Referee"
             },
             {
                 "name": "player-roster",
@@ -51,6 +83,14 @@
                 "file": "player-select/panel.html"
             },
             {
+                "name": "player-select_",
+                "title": "Player (Select)",
+                "width": 3,
+                "headerColor": "#222",
+                "file": "player-select/panel.html",
+                "workspace": "Committee"
+            },
+            {
                 "name": "rules-library",
                 "title": "Rules (Library)",
                 "width": 5,
@@ -63,6 +103,14 @@
                 "width": 3,
                 "headerColor": "#222",
                 "file": "rules-select/panel.html"
+            },
+            {
+                "name": "rules-select_",
+                "title": "Rules (Select)",
+                "width": 3,
+                "headerColor": "#222",
+                "file": "rules-select/panel.html",
+                "workspace": "Committee"
             }
         ],
         "graphics": [
