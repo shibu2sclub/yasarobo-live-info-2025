@@ -1,77 +1,86 @@
 (function () {
+    const rules = nodecg.Replicant('rules');
     const ps = nodecg.Replicant('pointState');
 
     const q = (s) => document.querySelector(s);
-    const $ = (sel) => Array.from(document.querySelectorAll(sel));
+    const itemsWrap = q('#items');
+    const statusBox = q('#status');
 
-    // ステータス表示要素
-    const elTotal = q('#stTotal');
-    const elRed = q('#stRed');
-    const elYellow = q('#stYellow');
-    const elBlue = q('#stBlue');
-    const elFree = q('#stFree');
-    const elRev = q('#stRev');
+    q('#reset').addEventListener('click', () => nodecg.sendMessage('point-control', { action: 'reset' }));
 
-    // 上限表示
-    const capRed = q('#capRed');
-    const capYellow = q('#capYellow');
-    const capBlue = q('#capBlue');
+    // 動的UI：ルールが変わったら組み立て直す
+    rules.on('change', () => buildUI());
+    ps.on('change', () => refresh());
 
-    // ボタン
-    const btnRedOk = $('[data-act="red-correct"]')[0];
-    const btnRedNg = $('[data-act="red-wrong"]')[0];
-    const btnYOk = $('[data-act="yellow-correct"]')[0];
-    const btnYNg = $('[data-act="yellow-wrong"]')[0];
-    const btnBOk = $('[data-act="blue-correct"]')[0];
-    const btnBNg = $('[data-act="blue-wrong"]')[0];
-    const btnFree = $('[data-act="free"]')[0];
-    const btnReset = q('#reset');
-
-    function send(action, extra) {
-        nodecg.sendMessage('point-control', { action, ...extra });
+    function sendAdd(key, ok) {
+        nodecg.sendMessage('point-control', { action: 'add', key, ok });
     }
 
-    // クリックイベント
-    btnRedOk.addEventListener('click', () => send('add-color', { color: 'red', ok: true }));
-    btnRedNg.addEventListener('click', () => send('add-color', { color: 'red', ok: false }));
-    btnYOk.addEventListener('click', () => send('add-color', { color: 'yellow', ok: true }));
-    btnYNg.addEventListener('click', () => send('add-color', { color: 'yellow', ok: false }));
-    btnBOk.addEventListener('click', () => send('add-color', { color: 'blue', ok: true }));
-    btnBNg.addEventListener('click', () => send('add-color', { color: 'blue', ok: false }));
-    btnFree.addEventListener('click', () => send('add-free'));
-    btnReset.addEventListener('click', () => send('reset'));
+    function buildUI() {
+        const list = rules.value?.items || [];
+        itemsWrap.innerHTML = '';
 
-    // 表示更新
-    ps.on('change', (v) => {
-        const show = (arr) => `[${(arr || []).map(x => x ? '○' : '×').join(', ')}]`;
+        for (const it of list) {
+            const row = document.createElement('div');
+            row.className = 'row row-grid';
+            row.dataset.key = it.key;
 
-        const redCount = (v.red || []).length;
-        const yellowCount = (v.yellow || []).length;
-        const blueCount = (v.blue || []).length;
-        const freeCount = Number(v.free || 0);
+            const name = document.createElement('div');
+            name.className = 'name';
+            name.textContent = it.labelDashboard || it.key;
 
-        elTotal.textContent = String(v.total || 0);
-        elRed.textContent = show(v.red);
-        elYellow.textContent = show(v.yellow);
-        elBlue.textContent = show(v.blue);
-        elFree.textContent = String(freeCount);
-        elRev.textContent = String(v.rev || 0);
+            const btnOK = document.createElement('button');
+            btnOK.textContent = `${it.labelDashboard || it.key} 正解(+${it.pointsCorrect ?? 0})`;
+            btnOK.addEventListener('click', () => sendAdd(it.key, true));
 
-        // 上限表示（色は5）＋ ボタン有効/無効
-        const COLOR_CAP = 5;
-        capRed.textContent = `${redCount} / ${COLOR_CAP}`;
-        capYellow.textContent = `${yellowCount} / ${COLOR_CAP}`;
-        capBlue.textContent = `${blueCount} / ${COLOR_CAP}`;
+            const btnNG = document.createElement('button');
+            btnNG.textContent = `${it.labelDashboard || it.key} 誤り(+${it.pointsWrong ?? 0})`;
+            btnNG.addEventListener('click', () => sendAdd(it.key, false));
 
-        const redFull = redCount >= COLOR_CAP;
-        const yellowFull = yellowCount >= COLOR_CAP;
-        const blueFull = blueCount >= COLOR_CAP;
+            // pointsWrong が 0 のときはボタンを隠す（仕様に合わせてスッキリ）
+            if (!it.pointsWrong) btnNG.style.display = 'none';
 
-        btnRedOk.disabled = btnRedNg.disabled = redFull;
-        btnYOk.disabled = btnYNg.disabled = yellowFull;
-        btnBOk.disabled = btnBNg.disabled = blueFull;
+            const cap = document.createElement('span');
+            cap.className = 'cap';
+            cap.id = `cap-${it.key}`;
+            cap.textContent = `0 / ${it.cap ?? 0}`;
 
-        // ★ 自由ボールは1回のみ
-        btnFree.disabled = freeCount >= 1;
-    });
+            row.appendChild(name);
+            row.appendChild(btnOK);
+            row.appendChild(btnNG);
+            row.appendChild(cap);
+            itemsWrap.appendChild(row);
+        }
+
+        refresh();
+    }
+
+    function refresh() {
+        const list = rules.value?.items || [];
+        const st = ps.value || { entries: {}, total: 0, rev: 0 };
+
+        // ボタンの enable/disable と cap 表示
+        for (const it of list) {
+            const arr = st.entries?.[it.key] || [];
+            const full = arr.length >= (it.cap ?? 0);
+            const row = itemsWrap.querySelector(`.row[data-key="${it.key}"]`);
+            if (!row) continue;
+            const [btnOK, btnNG] = row.querySelectorAll('button');
+            btnOK.disabled = full;
+            if (btnNG) btnNG.disabled = full;
+            const cap = row.querySelector(`#cap-${it.key}`);
+            if (cap) cap.textContent = `${arr.length} / ${it.cap ?? 0}`;
+        }
+
+        // ステータス（合計と各内訳）
+        const parts = [];
+        parts.push(`<div><strong>Total:</strong> ${st.total}</div>`);
+        for (const it of list) {
+            const arr = st.entries?.[it.key] || [];
+            const s = `[${arr.map(v => v ? '○' : '×').join(', ')}]`;
+            parts.push(`<div><strong>${it.labelDashboard || it.key}:</strong> ${s}</div>`);
+        }
+        parts.push(`<div><strong>rev:</strong> ${st.rev}</div>`);
+        statusBox.innerHTML = parts.join('');
+    }
 })();

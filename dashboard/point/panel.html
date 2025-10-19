@@ -5,43 +5,37 @@
     <meta charset="utf-8" />
     <title>Point</title>
     <link rel="stylesheet" href="./panel.css" />
+    <style>
+        .row-grid {
+            display: grid;
+            grid-template-columns: auto auto auto 1fr;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .name {
+            min-width: 3em;
+        }
+
+        .cap {
+            font-size: 12px;
+            opacity: .85;
+        }
+    </style>
 </head>
 
 <body>
     <div class="wrap">
         <h2>Point</h2>
 
-        <div class="row">
-            <button data-act="red-correct">赤 正解(+3)</button>
-            <button data-act="red-wrong">赤 誤り(+1)</button>
-            <span id="capRed" class="cap">0 / 5</span>
-        </div>
+        <!-- ここにルールに基づく行（正解/誤りボタン＋cap表示）が追加される -->
+        <div id="items"></div>
 
         <div class="row">
-            <button data-act="yellow-correct">黄 正解(+3)</button>
-            <button data-act="yellow-wrong">黄 誤り(+1)</button>
-            <span id="capYellow" class="cap">0 / 5</span>
-        </div>
-
-        <div class="row">
-            <button data-act="blue-correct">青 正解(+3)</button>
-            <button data-act="blue-wrong">青 誤り(+1)</button>
-            <span id="capBlue" class="cap">0 / 5</span>
-        </div>
-
-        <div class="row">
-            <button data-act="free">自由ボール(+5)</button>
             <button id="reset" class="danger">Reset</button>
         </div>
 
-        <div class="status">
-            <div><strong>Total:</strong> <span id="stTotal">0</span></div>
-            <div><strong>赤:</strong> <span id="stRed">[]</span></div>
-            <div><strong>黄:</strong> <span id="stYellow">[]</span></div>
-            <div><strong>青:</strong> <span id="stBlue">[]</span></div>
-            <div><strong>自由:</strong> <span id="stFree">0</span></div>
-            <div><strong>rev:</strong> <span id="stRev">0</span></div>
-        </div>
+        <div class="status" id="status"></div>
     </div>
 
     <script src="/nodecg-api.min.js"></script>

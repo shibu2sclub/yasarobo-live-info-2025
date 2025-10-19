@@ -49,6 +49,13 @@
                 "width": 3,
                 "headerColor": "#222",
                 "file": "player-select/panel.html"
+            },
+            {
+                "name": "rules",
+                "title": "Rules (JSON)",
+                "width": 5,
+                "headerColor": "#222",
+                "file": "rules/panel.html"
             }
         ],
         "graphics": [

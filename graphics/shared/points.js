@@ -1,11 +1,13 @@
-// 合計点をシンプルに平文表示（live-main でのみ使用）
+// pointState.total を購読して #points のテキストを更新
 (function () {
-    const pointState = nodecg.Replicant('pointState');
-    const el = () => document.getElementById('points');
+    const ps = nodecg.Replicant('pointState');
 
-    pointState.on('change', (v) => {
-        if (!el()) return;
-        const total = v?.total ?? 0;
-        document.getElementById('points').textContent = `SCORE: ${total}`;
+    function $(id) { return document.getElementById(id); }
+
+    ps.on('change', (v) => {
+        const el = $('points');
+        if (!el) return;
+        const total = Number(v?.total || 0);
+        el.textContent = `SCORE: ${total}`;
     });
 })();
