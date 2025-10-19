@@ -11,32 +11,57 @@
     <div class="wrap">
         <h2>Player (Roster / CSV)</h2>
 
+        <!-- 入力フォーム（追加フィールド） -->
         <div class="row">
             <label>ID</label>
             <input id="pid" type="text" placeholder="1234" />
             <label>Robot</label>
             <input id="robot" type="text" placeholder="Raptor-X" />
+            <label>Robot Short</label>
+            <input id="robotShort" type="text" placeholder="R-X" />
+            <label>Robot EN</label>
+            <input id="robotEn" type="text" placeholder="Raptor-X" />
+        </div>
+
+        <div class="row">
+            <label>Team</label>
+            <input id="team" type="text" placeholder="八紗工房A" />
+            <label>Team Short</label>
+            <input id="teamShort" type="text" placeholder="八紗A" />
+            <label>Team EN</label>
+            <input id="teamEn" type="text" placeholder="YASA Lab A" />
+            <label>Order</label>
+            <input id="order" type="number" min="1" step="1" placeholder="1" />
+        </div>
+
+        <div class="row">
+            <label>Appeal</label>
+            <input id="appeal" type="text" placeholder="〇〇に挑戦します！" style="width: 100%;" />
             <button id="add">追加/上書き</button>
         </div>
 
+        <!-- CSV 操作 -->
         <div class="row">
             <input id="csvFile" type="file" accept=".csv" />
             <button id="csvImportReplace">CSV取込（置換）</button>
             <button id="csvImportUpsert">CSV取込（追加入替）</button>
             <button id="csvExport">CSV書き出し</button>
+            <span class="count">登録数: <strong id="count">0</strong></span>
         </div>
         <p class="hint">
-            CSV形式: <code>id,robot</code>（1行目ヘッダ可） 例: <code>1001,Raptor-X</code>
+            CSVはヘッダ必須（順不同OK）：<br />
+            <code>id,robot,robotShort,robotEn,team,teamShort,teamEn,order,appeal</code>
         </p>
 
+        <!-- 名簿リスト -->
+        <div class="list-wrap">
+            <select id="list" size="10" style="width:100%"></select>
+        </div>
+
+        <!-- 削除 -->
         <div class="row">
             <button id="remove" class="warn">選択行を削除</button>
             <button id="clearRoster" class="danger">名簿を全消去</button>
-            <span class="count">登録数: <strong id="count">0</strong></span>
-        </div>
-
-        <div class="list-wrap">
-            <select id="list" size="10" style="width:100%"></select>
         </div>
     </div>
 

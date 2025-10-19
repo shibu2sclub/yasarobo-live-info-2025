@@ -1,3 +1,4 @@
-id,robot
-1001,Raptor-X
-1002,"雷神, Type-S"
+id,robot,robotShort,robotEn,team,teamShort,teamEn,order,appeal
+1001,Raptor-X,R-X,Raptor-X,YASA Lab A,YASA A,YASA Lab A,1,"高機動型カスタム"
+1002,雷神,雷,Raijin,八紗工房B,八紗B,YASA Factory B,2,"重量球を安定搬送"
+1003,鳳凰,,Houou,Team Phoenix,TP,Team Phoenix,, "初出場です！"

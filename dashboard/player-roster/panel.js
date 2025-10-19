@@ -3,8 +3,17 @@
 
     const q = (s) => document.querySelector(s);
 
+    // 入力欄
     const elId = q('#pid');
     const elRobot = q('#robot');
+    const elRobotShort = q('#robotShort');
+    const elRobotEn = q('#robotEn');
+    const elTeam = q('#team');
+    const elTeamShort = q('#teamShort');
+    const elTeamEn = q('#teamEn');
+    const elOrder = q('#order');
+    const elAppeal = q('#appeal');
+
     const elList = q('#list');
     const elCount = q('#count');
 
@@ -16,10 +25,22 @@
     q('#add').addEventListener('click', () => {
         const id = elId.value.trim();
         const robot = elRobot.value.trim();
-        if (!id || !robot) return;
-        send('add', { id, robot });
-        elId.value = '';
-        elRobot.value = '';
+        if (!id || !robot) { alert('ID と Robot は必須です'); return; }
+
+        send('add', {
+            id,
+            robot,
+            robotShort: elRobotShort.value.trim(),
+            robotEn: elRobotEn.value.trim(),
+            team: elTeam.value.trim(),
+            teamShort: elTeamShort.value.trim(),
+            teamEn: elTeamEn.value.trim(),
+            order: elOrder.value === '' ? undefined : Number(elOrder.value),
+            appeal: elAppeal.value
+        });
+
+        // 入力値は残しても良いが、ID/Robot 以外も消したい場合はここでクリア
+        // elId.value = ''; elRobot.value = ''; ...
     });
 
     // 削除（選択行）
@@ -55,21 +76,51 @@
         reader.readAsText(file);
     }
 
+    // ヘッダ必須。順不同OK。足りない列は空扱い。
     function parseCsv(text) {
         const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n')
             .map(l => l.trim()).filter(l => l.length > 0);
+        if (lines.length === 0) return [];
+
+        const header = splitCsvLine(lines[0]).map(h => h.trim());
+        const idx = indexBy(header);
+
         const out = [];
-        for (let i = 0; i < lines.length; i++) {
+        for (let i = 1; i < lines.length; i++) {
             const cols = splitCsvLine(lines[i]);
-            if (cols.length < 2) continue;
-            if (i === 0 && /^id$/i.test(cols[0]) && /^robot$/i.test(cols[1])) continue;
-            const id = String(cols[0]).trim();
-            const robot = String(cols[1]).trim();
-            if (!id || !robot) continue;
-            out.push({ id, robot });
+            const get = (name) => {
+                const k = idx[name];
+                return (k == null) ? '' : (cols[k] ?? '').trim();
+            };
+            const row = {
+                id: get('id'),
+                robot: get('robot'),
+                robotShort: get('robotShort'),
+                robotEn: get('robotEn'),
+                team: get('team'),
+                teamShort: get('teamShort'),
+                teamEn: get('teamEn'),
+                order: get('order'),
+                appeal: get('appeal'),
+            };
+            out.push(row);
         }
         return out;
     }
+
+    function indexBy(header) {
+        const names = ['id', 'robot', 'robotShort', 'robotEn', 'team', 'teamShort', 'teamEn', 'order', 'appeal'];
+        const map = {};
+        for (const n of names) {
+            const k = header.findIndex(h => h.toLowerCase() === n.toLowerCase());
+            if (k >= 0) map[n] = k;
+        }
+        if (map.id == null || map.robot == null) {
+            throw new Error('CSVヘッダに id, robot が必要です');
+        }
+        return map;
+    }
+
     function splitCsvLine(line) {
         const res = []; let cur = ''; let inQ = false;
         for (let i = 0; i < line.length; i++) {
@@ -86,10 +137,23 @@
         }
         res.push(cur); return res;
     }
+
     function exportCsv() {
         const list = roster.value || [];
-        const header = 'id,robot';
-        const body = list.map(p => `${escCsv(p.id)},${escCsv(p.robot)}`).join('\n');
+        const header = ['id', 'robot', 'robotShort', 'robotEn', 'team', 'teamShort', 'teamEn', 'order', 'appeal'].join(',');
+        const body = list.map(p =>
+            [
+                escCsv(p.id),
+                escCsv(p.robot),
+                escCsv(p.robotShort ?? ''),
+                escCsv(p.robotEn ?? ''),
+                escCsv(p.team ?? ''),
+                escCsv(p.teamShort ?? ''),
+                escCsv(p.teamEn ?? ''),
+                p.order == null ? '' : String(p.order),
+                escCsv(p.appeal ?? ''),
+            ].join(',')
+        ).join('\n');
         const csv = header + '\n' + body;
         const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
         const blob = new Blob([bom, csv], { type: 'text/csv;charset=utf-8;' });
@@ -100,13 +164,23 @@
     }
     function escCsv(s) { s = String(s); const nq = /[",\n]/.test(s); s = s.replace(/"/g, '""'); return nq ? `"${s}"` : s; }
 
-    // リスト描画
+    // リスト描画：order→team→id の順で並べると探しやすい
     roster.on('change', (list = []) => {
+        const sorted = [...list].sort((a, b) => {
+            const ao = a.order ?? 1e9, bo = b.order ?? 1e9;
+            if (ao !== bo) return ao - bo;
+            const at = (a.team || '').localeCompare(b.team || ''); if (at !== 0) return at;
+            return String(a.id).localeCompare(String(b.id));
+        });
+
         elList.innerHTML = '';
-        list.forEach(p => {
+        sorted.forEach(p => {
             const opt = document.createElement('option');
+            const order = p.order == null ? '-' : String(p.order);
+            const team = p.team ? ` / ${p.team}` : '';
+            const robot = p.robotShort || p.robot || '';
             opt.value = p.id;
-            opt.textContent = `ID:${p.id} / ${p.robot}`;
+            opt.textContent = `[${order}] ID:${p.id}${team} / ${robot}`;
             elList.appendChild(opt);
         });
         elCount.textContent = String(list.length);

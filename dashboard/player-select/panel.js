@@ -31,16 +31,26 @@
         const keyword = elFilter.value.trim().toLowerCase();
         elList.innerHTML = '';
         const list = !keyword ? rawList : rawList.filter(p =>
-            String(p.id).toLowerCase().includes(keyword) || String(p.robot).toLowerCase().includes(keyword)
+            String(p.id).toLowerCase().includes(keyword) ||
+            String(p.robot).toLowerCase().includes(keyword) ||
+            String(p.team || '').toLowerCase().includes(keyword)
         );
-        list.forEach(p => {
+        const sorted = [...list].sort((a, b) => {
+            const ao = a.order ?? 1e9, bo = b.order ?? 1e9; if (ao !== bo) return ao - bo;
+            return String(a.id).localeCompare(String(b.id));
+        });
+        sorted.forEach(p => {
             const opt = document.createElement('option');
+            const order = p.order == null ? '-' : String(p.order);
+            const tagTeam = p.team ? ` / ${p.team}` : '';
+            const robot = p.robotShort || p.robot || '';
             opt.value = p.id;
-            opt.textContent = `ID:${p.id} / ${p.robot}`;
+            opt.textContent = `[${order}] ID:${p.id}${tagTeam} / ${robot}`;
             elList.appendChild(opt);
         });
         elCount.textContent = String(rawList.length);
     }
+
 
     roster.on('change', (list = []) => { rawList = list; renderList(); });
     current.on('change', (p) => { elCur.textContent = p ? `ID:${p.id} / ${p.robot}` : '（なし）'; });
