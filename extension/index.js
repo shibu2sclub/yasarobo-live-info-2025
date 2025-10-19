@@ -5,5 +5,9 @@ module.exports = (nodecg) => {
     require('./player')(nodecg);
     require('./results')(nodecg);
     require('./retry')(nodecg);
-    nodecg.log.info('[yasarobo-live-info-2025] extension initialized (timer/points/player/results/retry loaded)');
+
+    // ★ 追加：複数ルール管理
+    require('./ruleslib')(nodecg);
+
+    nodecg.log.info('[yasarobo-live-info-2025] extension initialized (timer/points/player/results/retry/ruleslib loaded)');
 };

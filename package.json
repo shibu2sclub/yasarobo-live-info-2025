@@ -51,11 +51,18 @@
                 "file": "player-select/panel.html"
             },
             {
-                "name": "rules",
-                "title": "Rules (JSON)",
+                "name": "rules-library",
+                "title": "Rules (Library)",
                 "width": 5,
                 "headerColor": "#222",
-                "file": "rules/panel.html"
+                "file": "rules-library/panel.html"
+            },
+            {
+                "name": "rules-select",
+                "title": "Rules (Select)",
+                "width": 3,
+                "headerColor": "#222",
+                "file": "rules-select/panel.html"
             }
         ],
         "graphics": [
