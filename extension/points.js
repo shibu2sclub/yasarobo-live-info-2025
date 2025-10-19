@@ -26,21 +26,26 @@
  * - 'point-control', { action: 'reset' }                            // 全クリア
  */
 
+'use strict';
+
 module.exports = (nodecg) => {
-    /** @type {import('nodecg/types/replicant').Replicant<{items: Array<any>}>>} */
-    const rules = nodecg.Replicant('rules', {
-        persistent: true,
-        defaultValue: {
-            attemptsCount: 2,
-            retryAttemptsCount: 3,
-            items: [
-                { key: 'red', labelDashboard: '赤', labelGraphics: 'RED', pointsCorrect: 3, pointsWrong: 1, cap: 5 },
-                { key: 'yellow', labelDashboard: '黄', labelGraphics: 'YELLOW', pointsCorrect: 3, pointsWrong: 1, cap: 5 },
-                { key: 'blue', labelDashboard: '青', labelGraphics: 'BLUE', pointsCorrect: 3, pointsWrong: 1, cap: 5 },
-                { key: 'free', labelDashboard: '自由', labelGraphics: 'FREE', pointsCorrect: 5, pointsWrong: 0, cap: 1 },
-            ]
-        }
-    });
+  /** rules: ルールの外部設定（persistent） */
+  const rules = nodecg.Replicant('rules', {
+    persistent: true,
+    defaultValue: {
+      nameDashboard: '標準ルール',
+      nameGraphics: 'STANDARD RULE',
+      nameGraphicsShortEn: 'STD',
+      attemptsCount: 2,
+      retryAttemptsCount: 3,
+      items: [
+        { key: 'red',    labelDashboard: '赤',   labelGraphics: 'RED',    pointsCorrect: 3, pointsWrong: 1, cap: 5 },
+        { key: 'yellow', labelDashboard: '黄',   labelGraphics: 'YELLOW', pointsCorrect: 3, pointsWrong: 1, cap: 5 },
+        { key: 'blue',   labelDashboard: '青',   labelGraphics: 'BLUE',   pointsCorrect: 3, pointsWrong: 1, cap: 5 },
+        { key: 'free',   labelDashboard: '自由', labelGraphics: 'FREE',   pointsCorrect: 5, pointsWrong: 0, cap: 1 }
+      ]
+    }
+  });
 
 
     /** @type {import('nodecg/types/replicant').Replicant<{entries: Record<string, boolean[]>, total: number, rev: number}>>} */

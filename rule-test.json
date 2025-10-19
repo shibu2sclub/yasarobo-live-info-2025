@@ -1,0 +1,41 @@
+{
+    "nameDashboard": "チャレンジャーズコース",
+    "nameGraphics": "チャレンジャーズコース",
+    "nameGraphicsShortEn": "Challengers",
+    "attemptsCount": 2,
+    "retryAttemptsCount": 3,
+    "items": [
+        {
+            "key": "red",
+            "labelDashboard": "赤",
+            "labelGraphics": "Red",
+            "pointsCorrect": 3,
+            "pointsWrong": 1,
+            "cap": 5
+        },
+        {
+            "key": "yellow",
+            "labelDashboard": "黄",
+            "labelGraphics": "Yellow",
+            "pointsCorrect": 3,
+            "pointsWrong": 1,
+            "cap": 5
+        },
+        {
+            "key": "blue",
+            "labelDashboard": "青",
+            "labelGraphics": "Blue",
+            "pointsCorrect": 3,
+            "pointsWrong": 1,
+            "cap": 5
+        },
+        {
+            "key": "free",
+            "labelDashboard": "自由",
+            "labelGraphics": "Tennis",
+            "pointsCorrect": 5,
+            "pointsWrong": 0,
+            "cap": 1
+        }
+    ]
+}
