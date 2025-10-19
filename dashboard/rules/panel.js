@@ -8,8 +8,9 @@
 
     rules.on('change', (v) => {
         try {
-            const obj = v || { items: [], attemptsCount: 2 };
+            const obj = v || { items: [], attemptsCount: 2, retryAttemptsCount: 3 };
             if (obj.attemptsCount == null) obj.attemptsCount = 2;
+            if (obj.retryAttemptsCount == null) obj.retryAttemptsCount = 3;
             elJson.value = JSON.stringify(obj, null, 2);
             elState.textContent = '最新のルールを読み込み済み';
         } catch { /* ignore */ }
@@ -19,8 +20,12 @@
         try {
             const obj = JSON.parse(elJson.value);
             if (!obj || !Array.isArray(obj.items)) throw new Error('items が配列ではありません');
+
             const n = Number(obj.attemptsCount ?? 2);
             obj.attemptsCount = (Number.isFinite(n) && n >= 1) ? Math.floor(n) : 2;
+
+            const r = Number(obj.retryAttemptsCount ?? 3);
+            obj.retryAttemptsCount = (Number.isFinite(r) && r >= 0) ? Math.floor(r) : 3;
 
             for (const it of obj.items) {
                 if (!it.key) throw new Error('item に key が必要です');
@@ -28,7 +33,7 @@
                 it.pointsWrong = Number(it.pointsWrong || 0);
                 it.cap = Number(it.cap || 0);
             }
-            rules.value = obj; // 全UIに反映
+            rules.value = obj;
             elState.textContent = '適用しました';
         } catch (e) {
             console.error(e);

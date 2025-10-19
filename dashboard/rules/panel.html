@@ -12,10 +12,12 @@
         <h2>Rules (JSON)</h2>
 
         <p class="hint">以下の JSON を編集して「適用」。<br>
-            <strong>attemptsCount</strong> を追加すると、試技回数（保存スロット数）が変わります（例：3）。<br>
+            <strong>attemptsCount</strong> … 試技回数（保存スロット数）<br>
+            <strong>retryAttemptsCount</strong> … リトライ上限（デフォルト 3）<br>
             例：
         <pre>{
   "attemptsCount": 2,
+  "retryAttemptsCount": 3,
   "items": [
     { "key": "red",    "labelDashboard": "赤",   "labelGraphics": "RED",    "pointsCorrect": 3, "pointsWrong": 1, "cap": 5 },
     { "key": "yellow", "labelDashboard": "黄",   "labelGraphics": "YELLOW", "pointsCorrect": 3, "pointsWrong": 1, "cap": 5 },
@@ -25,7 +27,7 @@
 }</pre>
         </p>
 
-        <textarea id="json" rows="18" spellcheck="false"></textarea>
+        <textarea id="json" rows="20" spellcheck="false"></textarea>
 
         <div class="row">
             <button id="apply">適用</button>

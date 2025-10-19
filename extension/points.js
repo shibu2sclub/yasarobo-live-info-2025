@@ -31,6 +31,8 @@ module.exports = (nodecg) => {
     const rules = nodecg.Replicant('rules', {
         persistent: true,
         defaultValue: {
+            attemptsCount: 2,
+            retryAttemptsCount: 3,
             items: [
                 { key: 'red', labelDashboard: '赤', labelGraphics: 'RED', pointsCorrect: 3, pointsWrong: 1, cap: 5 },
                 { key: 'yellow', labelDashboard: '黄', labelGraphics: 'YELLOW', pointsCorrect: 3, pointsWrong: 1, cap: 5 },
@@ -39,6 +41,7 @@ module.exports = (nodecg) => {
             ]
         }
     });
+
 
     /** @type {import('nodecg/types/replicant').Replicant<{entries: Record<string, boolean[]>, total: number, rev: number}>>} */
     const pointState = nodecg.Replicant('pointState', {

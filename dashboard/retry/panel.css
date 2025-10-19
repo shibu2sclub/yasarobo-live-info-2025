@@ -33,6 +33,14 @@ button.danger {
     border-color: #611;
 }
 
+/* ★ 回数オーバー時のグレーアウト（point と同じ） */
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: none;
+    /* hoverの明るさ変化を無効化 */
+}
+
 .status {
     margin-top: 8px;
     display: grid;
