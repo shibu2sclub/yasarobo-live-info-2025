@@ -13,39 +13,21 @@
 
         <div class="row">
             <div><strong>現在の選手:</strong> <span id="cur">（なし）</span></div>
+            <div style="margin-left:auto"><strong>試技回数:</strong> <span id="attemptsCount">—</span></div>
         </div>
 
-        <div class="grid">
-            <section class="card">
-                <h3>競技1回目</h3>
-                <div class="kv"><span>スコア</span><strong id="a1Score">—</strong></div>
-                <div class="kv"><span>競技残</span><strong id="a1Time">—</strong></div>
-                <div class="btns">
-                    <button id="save1">保存（1回目）</button>
-                    <button id="reset1" class="danger">リセット（1回目）</button>
-                </div>
-            </section>
+        <!-- N回分のカードをここに動的に生成 -->
+        <div id="cards" class="grid"></div>
 
-            <section class="card">
-                <h3>競技2回目</h3>
-                <div class="kv"><span>スコア</span><strong id="a2Score">—</strong></div>
-                <div class="kv"><span>競技残</span><strong id="a2Time">—</strong></div>
-                <div class="btns">
-                    <button id="save2">保存（2回目）</button>
-                    <button id="reset2" class="danger">リセット（2回目）</button>
-                </div>
-            </section>
-
-            <section class="card best">
-                <h3>ベスト</h3>
-                <div class="kv"><span>出典</span><strong id="bestFrom">—</strong></div>
-                <div class="kv"><span>スコア</span><strong id="bestScore">—</strong></div>
-                <div class="kv"><span>競技残</span><strong id="bestTime">—</strong></div>
-                <div class="btns">
-                    <button id="resetBoth" class="danger">両方リセット</button>
-                </div>
-            </section>
-        </div>
+        <section class="card best">
+            <h3>ベスト</h3>
+            <div class="kv"><span>出典</span><strong id="bestFrom">—</strong></div>
+            <div class="kv"><span>スコア</span><strong id="bestScore">—</strong></div>
+            <div class="kv"><span>競技残</span><strong id="bestTime">—</strong></div>
+            <div class="btns">
+                <button id="resetAll" class="danger">すべてリセット</button>
+            </div>
+        </section>
     </div>
 
     <script src="/nodecg-api.min.js"></script>

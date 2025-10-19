@@ -1,18 +1,20 @@
 (function () {
+    const rules = nodecg.Replicant('rules');
     const current = nodecg.Replicant('currentPlayer');
     const attempts = nodecg.Replicant('attemptsStore');
 
     const q = (s) => document.querySelector(s);
-    const curEl = q('#cur');
+    const elCur = q('#cur');
+    const elAC = q('#attemptsCount');
+    const elCards = q('#cards');
+    const elBestFrom = q('#bestFrom');
+    const elBestScore = q('#bestScore');
+    const elBestTime = q('#bestTime');
 
-    const a1Score = q('#a1Score');
-    const a1Time = q('#a1Time');
-    const a2Score = q('#a2Score');
-    const a2Time = q('#a2Time');
+    q('#resetAll').addEventListener('click', () => nodecg.sendMessage('results:reset-all'));
 
-    const bestFrom = q('#bestFrom');
-    const bestScore = q('#bestScore');
-    const bestTime = q('#bestTime');
+    let ac = 2; // attemptsCount
+    let lastPlayerId = null;
 
     function fmtMs(ms) {
         ms = Math.max(0, Math.floor(ms || 0));
@@ -23,35 +25,67 @@
         return `${m}:${String(s).padStart(2, '0')}.${String(c).padStart(2, '0')}`;
     }
 
-    function render() {
-        const p = current.value;
-        const store = attempts.value || { byPlayer: {} };
-        curEl.textContent = p ? `ID:${p.id} / ${p.robot}` : '（なし）';
-
-        let rec = null;
-        if (p && p.id) rec = store.byPlayer?.[p.id] || null;
-
-        const a1 = rec?.attempt1 || null;
-        const a2 = rec?.attempt2 || null;
-        const b = rec?.best || null;
-
-        a1Score.textContent = a1 ? `${a1.total}点` : '—';
-        a1Time.textContent = a1 ? fmtMs(a1.matchRemainingMs) : '—';
-        a2Score.textContent = a2 ? `${a2.total}点` : '—';
-        a2Time.textContent = a2 ? fmtMs(a2.matchRemainingMs) : '—';
-
-        bestFrom.textContent = b ? (b.from === 1 ? '1回目' : '2回目') : '—';
-        bestScore.textContent = b ? `${b.total}点` : '—';
-        bestTime.textContent = b ? fmtMs(b.matchRemainingMs) : '—';
+    function buildCards() {
+        elCards.innerHTML = '';
+        for (let i = 1; i <= ac; i++) {
+            const sec = document.createElement('section');
+            sec.className = 'card';
+            sec.dataset.index = String(i);
+            sec.innerHTML = `
+        <h3>競技${i}回目</h3>
+        <div class="kv"><span>スコア</span><strong class="score">—</strong></div>
+        <div class="kv"><span>競技残</span><strong class="time">—</strong></div>
+        <div class="btns">
+          <button class="save">保存（${i}回目）</button>
+          <button class="reset danger">リセット（${i}回目）</button>
+        </div>
+      `;
+            const btnSave = sec.querySelector('.save');
+            const btnReset = sec.querySelector('.reset');
+            btnSave.addEventListener('click', () => nodecg.sendMessage('results:save-attempt', { index: i }));
+            btnReset.addEventListener('click', () => nodecg.sendMessage('results:reset-attempt', { index: i }));
+            elCards.appendChild(sec);
+        }
     }
 
-    current.on('change', render);
+    function render() {
+        const p = current.value;
+        const st = attempts.value || { byPlayer: {} };
+        const rec = p?.id ? (st.byPlayer?.[p.id] || null) : null;
+
+        elCur.textContent = p ? `ID:${p.id} / ${p.robot}` : '（なし）';
+
+        // 各カード
+        const cards = elCards.querySelectorAll('section.card');
+        cards.forEach((sec, idx) => {
+            const i = idx + 1;
+            const entry = rec?.attempts?.[i - 1] || null;
+            sec.querySelector('.score').textContent = entry ? `${entry.total}点` : '—';
+            sec.querySelector('.time').textContent = entry ? fmtMs(entry.matchRemainingMs) : '—';
+        });
+
+        // ベスト
+        const b = rec?.best || null;
+        elBestFrom.textContent = b ? `${b.from}回目` : '—';
+        elBestScore.textContent = b ? `${b.total}点` : '—';
+        elBestTime.textContent = b ? fmtMs(b.matchRemainingMs) : '—';
+    }
+
+    rules.on('change', (v) => {
+        const n = Number(v?.attemptsCount ?? 2);
+        ac = Number.isFinite(n) && n >= 1 ? Math.floor(n) : 2;
+        elAC.textContent = String(ac);
+        buildCards();
+        render();
+    });
+
+    current.on('change', (p) => {
+        lastPlayerId = p?.id || null;
+        render();
+    });
+
     attempts.on('change', render);
 
-    // 操作
-    q('#save1').addEventListener('click', () => nodecg.sendMessage('results:save-attempt', { which: 1 }));
-    q('#save2').addEventListener('click', () => nodecg.sendMessage('results:save-attempt', { which: 2 }));
-    q('#reset1').addEventListener('click', () => nodecg.sendMessage('results:reset-attempt', { which: 1 }));
-    q('#reset2').addEventListener('click', () => nodecg.sendMessage('results:reset-attempt', { which: 2 }));
-    q('#resetBoth').addEventListener('click', () => nodecg.sendMessage('results:reset-both', {}));
+    // 初期
+    buildCards();
 })();

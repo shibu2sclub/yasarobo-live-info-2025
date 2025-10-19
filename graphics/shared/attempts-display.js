@@ -1,5 +1,6 @@
-// live-main に 1回目・2回目・ベストを表示（平文）
+// live-main に 試技N回 + ベスト を表示（平文）
 (function () {
+    const rules = nodecg.Replicant('rules');
     const current = nodecg.Replicant('currentPlayer');
     const attempts = nodecg.Replicant('attemptsStore');
 
@@ -14,32 +15,49 @@
         return `${m}:${String(s).padStart(2, '0')}.${String(c).padStart(2, '0')}`;
     }
 
+    let ac = 2;
+
+    function rebuild() {
+        const wrap = $('attemptsWrap');
+        if (!wrap) return;
+        wrap.innerHTML = '';
+        for (let i = 1; i <= ac; i++) {
+            const div = document.createElement('div');
+            div.id = `attempt${i}`;
+            div.textContent = `ATTEMPT ${i}: —`;
+            wrap.appendChild(div);
+        }
+        const best = document.createElement('div');
+        best.id = 'bestLine';
+        best.textContent = 'BEST: —';
+        wrap.appendChild(best);
+        render();
+    }
+
     function render() {
         const p = current.value;
-        const store = attempts.value || { byPlayer: {} };
-
-        const el1 = $('attempt1');
-        const el2 = $('attempt2');
-        const elB = $('bestLine');
-        if (!el1 || !el2 || !elB) return;
-
-        if (!p || !p.id) {
-            el1.textContent = 'ATTEMPT 1: —';
-            el2.textContent = 'ATTEMPT 2: —';
-            elB.textContent = 'BEST: —';
-            return;
+        const st = attempts.value || { byPlayer: {} };
+        const rec = p?.id ? (st.byPlayer?.[p.id] || null) : null;
+        for (let i = 1; i <= ac; i++) {
+            const el = $(`attempt${i}`);
+            if (!el) continue;
+            const e = rec?.attempts?.[i - 1] || null;
+            el.textContent = e ? `ATTEMPT ${i}: ${e.total}点 / 残 ${fmtMs(e.matchRemainingMs)}` : `ATTEMPT ${i}: —`;
         }
-
-        const rec = store.byPlayer?.[p.id] || null;
-        const a1 = rec?.attempt1 || null;
-        const a2 = rec?.attempt2 || null;
+        const bl = $('bestLine');
         const b = rec?.best || null;
-
-        el1.textContent = a1 ? `ATTEMPT 1: ${a1.total}点 / 残 ${fmtMs(a1.matchRemainingMs)}` : 'ATTEMPT 1: —';
-        el2.textContent = a2 ? `ATTEMPT 2: ${a2.total}点 / 残 ${fmtMs(a2.matchRemainingMs)}` : 'ATTEMPT 2: —';
-        elB.textContent = b ? `BEST: ${b.total}点 / 残 ${fmtMs(b.matchRemainingMs)}（${b.from === 1 ? '1回目' : '2回目'}）` : 'BEST: —';
+        if (bl) bl.textContent = b ? `BEST: ${b.total}点 / 残 ${fmtMs(b.matchRemainingMs)}（${b.from}回目）` : 'BEST: —';
     }
+
+    rules.on('change', (v) => {
+        const n = Number(v?.attemptsCount ?? 2);
+        const next = Number.isFinite(n) && n >= 1 ? Math.floor(n) : 2;
+        if (next !== ac) { ac = next; rebuild(); } else { render(); }
+    });
 
     current.on('change', render);
     attempts.on('change', render);
+
+    // 初期
+    rebuild();
 })();

@@ -8,27 +8,27 @@
 
     rules.on('change', (v) => {
         try {
-            // 既にユーザーが編集中なら上書きしたくない場合もあるが、
-            // ここでは常に最新を出す（必要なら「編集ロック」UIを足す）
-            elJson.value = JSON.stringify(v || { items: [] }, null, 2);
+            const obj = v || { items: [], attemptsCount: 2 };
+            if (obj.attemptsCount == null) obj.attemptsCount = 2;
+            elJson.value = JSON.stringify(obj, null, 2);
             elState.textContent = '最新のルールを読み込み済み';
-        } catch {
-            /* ignore */
-        }
+        } catch { /* ignore */ }
     });
 
     q('#apply').addEventListener('click', () => {
         try {
             const obj = JSON.parse(elJson.value);
-            // ざっくりバリデーション
             if (!obj || !Array.isArray(obj.items)) throw new Error('items が配列ではありません');
+            const n = Number(obj.attemptsCount ?? 2);
+            obj.attemptsCount = (Number.isFinite(n) && n >= 1) ? Math.floor(n) : 2;
+
             for (const it of obj.items) {
                 if (!it.key) throw new Error('item に key が必要です');
                 it.pointsCorrect = Number(it.pointsCorrect || 0);
                 it.pointsWrong = Number(it.pointsWrong || 0);
                 it.cap = Number(it.cap || 0);
             }
-            rules.value = obj; // Replicant 更新で全UIに反映される
+            rules.value = obj; // 全UIに反映
             elState.textContent = '適用しました';
         } catch (e) {
             console.error(e);

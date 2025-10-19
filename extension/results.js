@@ -1,45 +1,33 @@
 'use strict';
 
 /**
- * attemptsStore（永続）：
- * byPlayer: {
- *   [playerId]: {
- *     attempt1: ResultEntry | null,
- *     attempt2: ResultEntry | null,
- *     best: { total: number, matchRemainingMs: number, from: 1|2 } | null
+ * 可変試技回数に対応した結果管理。
+ *
+ * Replicants:
+ * - rules: { items: RuleItem[], attemptsCount: number }  ← attemptsCount を使用（既定 2）
+ * - attemptsStore (persistent): {
+ *     byPlayer: {
+ *       [playerId]: {
+ *         attempts: (ResultEntry|null)[], // 長さは可変。UI 側は rules.attemptsCount を基準に操作
+ *         best: { total:number, matchRemainingMs:number, from:number } | null
+ *       }
+ *     },
+ *     rev:number
  *   }
- * }
- * rev: number
  *
- * ResultEntry:
- * {
- *   id: string,                // 一意ID
- *   ts: number,                // 保存時刻(ms since epoch)
- *   playerId: string,
- *   robot: string,
- *   // 得点内訳と合計
- *   redCorrect: number, redWrong: number,
- *   yellowCorrect: number, yellowWrong: number,
- *   blueCorrect: number, blueWrong: number,
- *   free: number,
- *   total: number,
- *   // 時間（競技の残りのみ）
- *   matchRemainingMs: number
- * }
- *
- * メッセージ:
- * - results:save-attempt   { which: 1|2, reason?: 'manual' }
- * - results:reset-attempt  { which: 1|2 }
- * - results:reset-both     {}
+ * Messages:
+ * - results:save-attempt  { index:number }   // 1-based index
+ * - results:reset-attempt { index:number }
+ * - results:reset-all     {}
  */
 
 module.exports = (nodecg) => {
-    // 既存 Replicant を参照
+    const rules = nodecg.Replicant('rules');          // from points.js のルール JSON
     const timerState = nodecg.Replicant('timerState');     // from timer.js
-    const pointState = nodecg.Replicant('pointState');     // from points.js
+    const pointState = nodecg.Replicant('pointState');     // from points.js（total と entries）
     const current = nodecg.Replicant('currentPlayer');  // from player.js
 
-    /** @type {import('nodecg/types/replicant').Replicant<{byPlayer: Record<string, {attempt1:any|null,attempt2:any|null,best:any|null}>, rev:number}>} */
+    /** @type {import('nodecg/types/replicant').Replicant<{byPlayer:Record<string,{attempts:(any|null)[],best:any|null}>, rev:number}>} */
     const attemptsStore = nodecg.Replicant('attemptsStore', {
         persistent: true,
         defaultValue: { byPlayer: {}, rev: 0 }
@@ -48,22 +36,11 @@ module.exports = (nodecg) => {
     // ユーティリティ
     const nowId = () =>
         new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14) + '-' + Date.now();
-    const safeArr = (x) => Array.isArray(x) ? x : [];
-    const countOKNG = (arr) => {
-        let ok = 0, ng = 0;
-        for (const v of safeArr(arr)) (v ? ok++ : ng++);
-        return [ok, ng];
-    };
 
     function buildEntry() {
         const p = current.value;
         if (!p || !p.id) return null;
 
-        // 得点
-        const [rOK, rNG] = countOKNG(pointState.value?.red);
-        const [yOK, yNG] = countOKNG(pointState.value?.yellow);
-        const [bOK, bNG] = countOKNG(pointState.value?.blue);
-        const free = Number(pointState.value?.free || 0);
         const total = Number(pointState.value?.total || 0);
 
         // 競技残（match only）
@@ -75,7 +52,6 @@ module.exports = (nodecg) => {
             const elapsed = (s.accumulatedMs || 0) + (s.running ? (t - (s.startEpochMs || 0)) : 0);
             matchRemainingMs = Math.max(0, matchMs - elapsed);
         } else {
-            // 準備中保存 → 競技は未開始なのでフル残
             matchRemainingMs = Math.max(0, matchMs);
         }
 
@@ -84,86 +60,90 @@ module.exports = (nodecg) => {
             ts: Date.now(),
             playerId: p.id,
             robot: p.robot,
-            redCorrect: rOK, redWrong: rNG,
-            yellowCorrect: yOK, yellowWrong: yNG,
-            blueCorrect: bOK, blueWrong: bNG,
-            free,
             total,
             matchRemainingMs
         };
     }
 
-    function computeBest(a1, a2) {
-        if (!a1 && !a2) return null;
-        if (a1 && !a2) return { total: a1.total, matchRemainingMs: a1.matchRemainingMs, from: 1 };
-        if (!a1 && a2) return { total: a2.total, matchRemainingMs: a2.matchRemainingMs, from: 2 };
-        // 両方あり：得点が高い方、同点なら残が多い方
-        if (a1.total !== a2.total) {
-            return (a1.total > a2.total)
-                ? { total: a1.total, matchRemainingMs: a1.matchRemainingMs, from: 1 }
-                : { total: a2.total, matchRemainingMs: a2.matchRemainingMs, from: 2 };
-        }
-        // 同点 → 残が多い方が“良いタイム”
-        if (a1.matchRemainingMs !== a2.matchRemainingMs) {
-            return (a1.matchRemainingMs > a2.matchRemainingMs)
-                ? { total: a1.total, matchRemainingMs: a1.matchRemainingMs, from: 1 }
-                : { total: a2.total, matchRemainingMs: a2.matchRemainingMs, from: 2 };
-        }
-        // 完全同値 → 1を優先
-        return { total: a1.total, matchRemainingMs: a1.matchRemainingMs, from: 1 };
+    function computeBest(arr /* (ResultEntry|null)[] */) {
+        const list = (arr || []).filter(Boolean);
+        if (list.length === 0) return null;
+
+        // 得点が高い方、同点なら残が多い方（インデックスは 1-based）
+        let best = { total: -Infinity, matchRemainingMs: -Infinity, from: 1 };
+        list.forEach((e, i) => {
+            if (e.total > best.total ||
+                (e.total === best.total && e.matchRemainingMs > best.matchRemainingMs)) {
+                best = { total: e.total, matchRemainingMs: e.matchRemainingMs, from: i + 1 };
+            }
+        });
+        return best;
     }
 
-    function setAttempt(which, entry) {
+    function ensureRecord(playerId) {
+        const store = attemptsStore.value || { byPlayer: {}, rev: 0 };
+        if (!store.byPlayer[playerId]) {
+            store.byPlayer[playerId] = { attempts: [], best: null };
+        }
+        return store;
+    }
+
+    function setAttempt(index /* 1-based */, entry) {
         const p = current.value;
         if (!p || !p.id) return;
+        const store = ensureRecord(p.id);
+        const rec = store.byPlayer[p.id];
 
-        const store = attemptsStore.value || { byPlayer: {}, rev: 0 };
-        const rec = store.byPlayer[p.id] || { attempt1: null, attempt2: null, best: null };
+        const i = Math.max(1, Math.floor(index)) - 1;
+        if (!Array.isArray(rec.attempts)) rec.attempts = [];
+        // 足りないところは null で埋める
+        while (rec.attempts.length <= i) rec.attempts.push(null);
 
-        if (which === 1) rec.attempt1 = entry;
-        else if (which === 2) rec.attempt2 = entry;
+        rec.attempts[i] = entry;
+        rec.best = computeBest(rec.attempts);
 
-        rec.best = computeBest(rec.attempt1, rec.attempt2);
-        store.byPlayer[p.id] = rec;
         attemptsStore.value = { ...store, rev: (store.rev || 0) + 1 };
-
-        nodecg.log.info(`[attempts] set attempt${which} for ${p.id} total=${entry?.total ?? '—'} rem=${entry?.matchRemainingMs ?? '—'} bestFrom=${rec.best?.from ?? '—'}`);
+        nodecg.log.info(`[attempts] set attempt#${index} for ${p.id} total=${entry?.total ?? '—'} rem=${entry?.matchRemainingMs ?? '—'} bestFrom=${rec.best?.from ?? '—'}`);
     }
 
-    function resetAttempt(which) {
+    function resetAttempt(index /* 1-based */) {
         const p = current.value;
         if (!p || !p.id) return;
+        const store = ensureRecord(p.id);
+        const rec = store.byPlayer[p.id];
 
-        const store = attemptsStore.value || { byPlayer: {}, rev: 0 };
-        const rec = store.byPlayer[p.id] || { attempt1: null, attempt2: null, best: null };
+        const i = Math.max(1, Math.floor(index)) - 1;
+        while (rec.attempts.length <= i) rec.attempts.push(null);
+        rec.attempts[i] = null;
+        rec.best = computeBest(rec.attempts);
 
-        if (which === 1) rec.attempt1 = null;
-        else if (which === 2) rec.attempt2 = null;
-
-        rec.best = computeBest(rec.attempt1, rec.attempt2);
-        store.byPlayer[p.id] = rec;
         attemptsStore.value = { ...store, rev: (store.rev || 0) + 1 };
-
-        nodecg.log.info(`[attempts] reset attempt${which} for ${p.id}`);
+        nodecg.log.info(`[attempts] reset attempt#${index} for ${p.id}`);
     }
 
-    // メッセージAPI
+    function resetAll() {
+        const p = current.value;
+        if (!p || !p.id) return;
+        const store = ensureRecord(p.id);
+        store.byPlayer[p.id] = { attempts: [], best: null };
+        attemptsStore.value = { ...store, rev: (store.rev || 0) + 1 };
+        nodecg.log.info(`[attempts] reset all for ${p?.id}`);
+    }
+
+    // メッセージ
     nodecg.listenFor('results:save-attempt', (msg) => {
-        const which = Number(msg?.which);
-        if (which !== 1 && which !== 2) return;
+        const idx = Number(msg?.index);
+        if (!Number.isFinite(idx) || idx < 1) return;
         const entry = buildEntry();
         if (!entry) return;
-        setAttempt(which, entry);
+        setAttempt(idx, entry);
     });
 
     nodecg.listenFor('results:reset-attempt', (msg) => {
-        const which = Number(msg?.which);
-        if (which !== 1 && which !== 2) return;
-        resetAttempt(which);
+        const idx = Number(msg?.index);
+        if (!Number.isFinite(idx) || idx < 1) return;
+        resetAttempt(idx);
     });
 
-    nodecg.listenFor('results:reset-both', () => {
-        resetAttempt(1);
-        resetAttempt(2);
-    });
+    nodecg.listenFor('results:reset-all', () => resetAll());
 };
