@@ -12,8 +12,15 @@
         <h2>Player (Select)</h2>
 
         <div class="row">
-            <input id="filter" type="text" placeholder="絞り込み（ID/Robot 部分一致）" />
+            <input id="filter" type="text" placeholder="絞り込み（ID/Robot/Team 部分一致）" />
             <button id="clearCur">現在表示をクリア</button>
+        </div>
+
+        <!-- ▼ 追加：order順の前後移動 -->
+        <div class="row">
+            <button id="prevOrder">前へ（order）</button>
+            <button id="nextOrder">次へ（order）</button>
+            <span style="font-size:12px;opacity:.8;">※現在のリスト並び（order→id）に沿って移動します</span>
         </div>
 
         <div class="row">
