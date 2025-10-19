@@ -11,7 +11,7 @@
             {
                 "name": "timer-control",
                 "title": "Timer Control",
-                "width": 4,
+                "width": 6,
                 "headerColor": "#222",
                 "file": "timer-control/panel.html"
             },
