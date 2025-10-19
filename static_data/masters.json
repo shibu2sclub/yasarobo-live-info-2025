@@ -1,0 +1,57 @@
+{
+    "nameDashboard": "マスターズコース",
+    "nameGraphics": "マスターズコース",
+    "nameGraphicsShortEn": "Masters",
+    "attemptsCount": 2,
+    "retryAttemptsCount": 3,
+    "items": [
+        {
+            "key": "red",
+            "labelDashboard": "赤",
+            "labelGraphics": "Red ball",
+            "pointsCorrect": 4,
+            "pointsWrong": 1,
+            "cap": 6
+        },
+        {
+            "key": "blue",
+            "labelDashboard": "青",
+            "labelGraphics": "Blue ball",
+            "pointsCorrect": 4,
+            "pointsWrong": 1,
+            "cap": 2
+        },
+        {
+            "key": "stealcan",
+            "labelDashboard": "鉄缶",
+            "labelGraphics": "Can (Steel)",
+            "pointsCorrect": 6,
+            "pointsWrong": 1,
+            "cap": 3
+        },
+        {
+            "key": "alumican",
+            "labelDashboard": "アルミ缶",
+            "labelGraphics": "Can (Aluminum)",
+            "pointsCorrect": 10,
+            "pointsWrong": 1,
+            "cap": 1
+        },
+        {
+            "key": "pet",
+            "labelDashboard": "ウォーターボトル",
+            "labelGraphics": "Water Bottle",
+            "pointsCorrect": 15,
+            "pointsWrong": 0,
+            "cap": 1
+        },
+        {
+            "key": "free",
+            "labelDashboard": "自由",
+            "labelGraphics": "Tennis",
+            "pointsCorrect": 5,
+            "pointsWrong": 0,
+            "cap": 1
+        }
+    ]
+}
