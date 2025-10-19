@@ -17,6 +17,9 @@
     const elList = q('#list');
     const elCount = q('#count');
 
+    // 最新の名簿を保持（選択→フォーム反映に使う）
+    let currentRoster = [];
+
     function send(action, extra) {
         nodecg.sendMessage('player-control', { action, ...extra });
     }
@@ -38,9 +41,6 @@
             order: elOrder.value === '' ? undefined : Number(elOrder.value),
             appeal: elAppeal.value
         });
-
-        // 入力値は残しても良いが、ID/Robot 以外も消したい場合はここでクリア
-        // elId.value = ''; elRobot.value = ''; ...
     });
 
     // 削除（選択行）
@@ -139,7 +139,7 @@
     }
 
     function exportCsv() {
-        const list = roster.value || [];
+        const list = currentRoster || [];
         const header = ['id', 'robot', 'robotShort', 'robotEn', 'team', 'teamShort', 'teamEn', 'order', 'appeal'].join(',');
         const body = list.map(p =>
             [
@@ -164,9 +164,12 @@
     }
     function escCsv(s) { s = String(s); const nq = /[",\n]/.test(s); s = s.replace(/"/g, '""'); return nq ? `"${s}"` : s; }
 
-    // リスト描画：order→team→id の順で並べると探しやすい
+    // ─────────────────────────────────────
+    // リスト描画 & 選択 → フォーム反映
+    // ─────────────────────────────────────
     roster.on('change', (list = []) => {
-        const sorted = [...list].sort((a, b) => {
+        currentRoster = Array.isArray(list) ? list : [];
+        const sorted = [...currentRoster].sort((a, b) => {
             const ao = a.order ?? 1e9, bo = b.order ?? 1e9;
             if (ao !== bo) return ao - bo;
             const at = (a.team || '').localeCompare(b.team || ''); if (at !== 0) return at;
@@ -183,6 +186,36 @@
             opt.textContent = `[${order}] ID:${p.id}${team} / ${robot}`;
             elList.appendChild(opt);
         });
-        elCount.textContent = String(list.length);
+        elCount.textContent = String(currentRoster.length);
     });
+
+    // 選択したレコードをフォームへ反映
+    elList.addEventListener('change', () => {
+        const opt = elList.selectedOptions[0];
+        if (!opt) return;
+        const id = opt.value;
+        const rec = currentRoster.find(r => String(r.id) === String(id));
+        if (rec) fillForm(rec);
+    });
+
+    // ダブルクリックでも反映（任意・使いやすさ向上）
+    elList.addEventListener('dblclick', () => {
+        const opt = elList.selectedOptions[0];
+        if (!opt) return;
+        const id = opt.value;
+        const rec = currentRoster.find(r => String(r.id) === String(id));
+        if (rec) fillForm(rec);
+    });
+
+    function fillForm(rec) {
+        elId.value = String(rec.id ?? '');
+        elRobot.value = String(rec.robot ?? '');
+        elRobotShort.value = String(rec.robotShort ?? '');
+        elRobotEn.value = String(rec.robotEn ?? '');
+        elTeam.value = String(rec.team ?? '');
+        elTeamShort.value = String(rec.teamShort ?? '');
+        elTeamEn.value = String(rec.teamEn ?? '');
+        elOrder.value = rec.order == null ? '' : String(rec.order);
+        elAppeal.value = String(rec.appeal ?? '');
+    }
 })();
