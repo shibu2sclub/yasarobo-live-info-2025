@@ -8,6 +8,7 @@ module.exports = (nodecg) => {
 
     // ★ 追加：複数ルール管理
     require('./ruleslib')(nodecg);
+    require('./rules-manager')(nodecg);
 
     nodecg.log.info('[yasarobo-live-info-2025] extension initialized (timer/points/player/results/retry/ruleslib loaded)');
 };
