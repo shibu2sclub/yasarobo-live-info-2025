@@ -1,98 +1,96 @@
 'use strict';
 
 /**
- * ルールを JSON で管理して得点計算を汎用化。
+ * ルールJSONで汎用化した得点管理（安全な初期化付き）
  *
  * Replicants:
- * - rules (persistent): { items: Array<RuleItem> }
- *   RuleItem = {
- *     key: string,                // 内部キー（"red" など）
- *     labelDashboard: string,     // Dashboard表示名（例: "赤"）
- *     labelGraphics: string,      // Graphics表示名（例: "RED"）
- *     pointsCorrect: number,      // 正解時の得点
- *     pointsWrong: number,        // 誤答時の得点（0 なら誤答ボタンを出さないUIにもできる）
- *     cap: number                 // 制限個数（上限）
- *   }
- *
- * - pointState (non-persistent):
- *   {
- *     entries: { [key: string]: boolean[] }, // true=正解, false=誤答 を押した履歴（capまで）
+ * - rules (persistent): { items: RuleItem[], ... }
+ * - pointState (non-persistent): {
+ *     entries: Record<string, boolean[]>,
  *     total: number,
  *     rev: number
  *   }
  *
- * Messages (from dashboard):
- * - 'point-control', { action: 'add',   key: string, ok: boolean }  // 1件追加（cap厳守）
- * - 'point-control', { action: 'reset' }                            // 全クリア
+ * Messages:
+ * - 'point-control', { action: 'add',   key: string, ok: boolean }
+ * - 'point-control', { action: 'reset' }
  */
 
-'use strict';
-
 module.exports = (nodecg) => {
-  /** rules: ルールの外部設定（persistent） */
-  const rules = nodecg.Replicant('rules', {
-    persistent: true,
-    defaultValue: {
-      nameDashboard: '標準ルール',
-      nameGraphics: 'STANDARD RULE',
-      nameGraphicsShortEn: 'STD',
-      attemptsCount: 2,
-      retryAttemptsCount: 3,
-      items: [
-        { key: 'red',    labelDashboard: '赤',   labelGraphics: 'RED',    pointsCorrect: 3, pointsWrong: 1, cap: 5 },
-        { key: 'yellow', labelDashboard: '黄',   labelGraphics: 'YELLOW', pointsCorrect: 3, pointsWrong: 1, cap: 5 },
-        { key: 'blue',   labelDashboard: '青',   labelGraphics: 'BLUE',   pointsCorrect: 3, pointsWrong: 1, cap: 5 },
-        { key: 'free',   labelDashboard: '自由', labelGraphics: 'FREE',   pointsCorrect: 5, pointsWrong: 0, cap: 1 }
-      ]
-    }
-  });
+    /** @type {import('nodecg/types/replicant').Replicant<{items:any[]}>} */
+    const rules = nodecg.Replicant('rules');
 
-
-    /** @type {import('nodecg/types/replicant').Replicant<{entries: Record<string, boolean[]>, total: number, rev: number}>>} */
+    /** @type {import('nodecg/types/replicant').Replicant<{entries:Record<string,boolean[]>, total:number, rev:number}>} */
     const pointState = nodecg.Replicant('pointState', {
         persistent: false,
         defaultValue: {
-            entries: {},
+            entries: {},   // ★ 必ずオブジェクトにしておく
             total: 0,
             rev: 0
         }
     });
 
-    // 便利関数
-    const byKey = (k) => (rules.value?.items || []).find(it => it.key === k) || null;
+    // ─────────────────────────────────────────────
+    // 安全ユーティリティ（ここが今回の対策の肝）
+    // ─────────────────────────────────────────────
+    function safePS() {
+        // Replicantがまだundefinedの瞬間にも備える
+        const ps = pointState.value || {};
+        if (typeof ps.entries !== 'object' || ps.entries === null) ps.entries = {};
+        if (typeof ps.total !== 'number' || !Number.isFinite(ps.total)) ps.total = 0;
+        if (typeof ps.rev !== 'number' || !Number.isFinite(ps.rev)) ps.rev = 0;
+        // 形を正規化して反映（参照を切り替えることで購読側も安定）
+        pointState.value = { entries: ps.entries, total: ps.total, rev: ps.rev };
+        return pointState.value;
+    }
+
+    function ensureEntryArray(key) {
+        const ps = safePS();
+        if (!ps.entries[key]) {
+            ps.entries[key] = [];
+            pointState.value = { ...ps, rev: ps.rev + 1 };
+        }
+        return ps.entries[key];
+    }
+
+    const getRuleByKey = (k) => (rules.value?.items || []).find(it => it.key === k) || null;
 
     const scoreOf = (key, val /* boolean */) => {
-        const r = byKey(key);
+        const r = getRuleByKey(key);
         if (!r) return 0;
         return val ? (r.pointsCorrect || 0) : (r.pointsWrong || 0);
     };
 
-    function recalcTotal(ps) {
+    function recalcTotal(psLike) {
+        const ps = psLike || safePS();
         let sum = 0;
-        const ents = ps.entries || {};
-        for (const [key, arr] of Object.entries(ents)) {
+        for (const [key, arr] of Object.entries(ps.entries || {})) {
             for (const v of (arr || [])) sum += scoreOf(key, !!v);
         }
         return sum;
     }
 
-    function ensureEntryArray(key) {
-        const ps = pointState.value;
-        if (!ps.entries[key]) ps.entries[key] = [];
-        return ps.entries[key];
-    }
-
+    // ─────────────────────────────────────────────
+    // メッセージハンドラ
+    // ─────────────────────────────────────────────
     nodecg.listenFor('point-control', (msg) => {
-        const ps = pointState.value;
-        switch (msg.action) {
+        const action = msg?.action;
+        switch (action) {
             case 'add': {
-                const key = String(msg.key || '').trim();
-                const ok = !!msg.ok;
-                const r = byKey(key);
-                if (!r) return;
+                const key = String(msg?.key || '').trim();
+                const ok = !!msg?.ok;
+                const r = getRuleByKey(key);
+                if (!r) {
+                    nodecg.log.warn(`[points] unknown key: "${key}"`);
+                    // revだけ進めてUI再描画トリガー（任意）
+                    const ps0 = safePS();
+                    pointState.value = { ...ps0, rev: ps0.rev + 1 };
+                    return;
+                }
+                const ps = safePS();
                 const arr = ensureEntryArray(key);
+                // cap超えは無視（UI側でdisableもしているが、バックエンドでも防御）
                 if (arr.length >= (r.cap ?? 0)) {
-                    // cap超えは無視（UIでもdisableにする）
                     pointState.value = { ...ps, rev: ps.rev + 1 };
                     return;
                 }
@@ -103,18 +101,35 @@ module.exports = (nodecg) => {
             }
 
             case 'reset': {
+                const ps = safePS();
                 pointState.value = { entries: {}, total: 0, rev: ps.rev + 1 };
                 break;
             }
 
             default:
+                // 何もしない
                 break;
         }
     });
 
-    // 軽いハートビート
+    // ─────────────────────────────────────────────
+    // ルール更新時の軽い整形（任意: 不存在キーの掃除など）
+    // ─────────────────────────────────────────────
+    rules.on('change', () => {
+        const ps = safePS();
+        // 存在しないキーを掃除（任意、残したいならこのブロックを削除）
+        const validKeys = new Set((rules.value?.items || []).map(it => it.key));
+        const nextEntries = {};
+        for (const [k, arr] of Object.entries(ps.entries)) {
+            if (validKeys.has(k)) nextEntries[k] = Array.isArray(arr) ? arr : [];
+        }
+        const next = { entries: nextEntries, total: recalcTotal({ entries: nextEntries }), rev: ps.rev + 1 };
+        pointState.value = next;
+    });
+
+    // 軽いハートビート（同期を促す）
     setInterval(() => {
-        const ps = pointState.value;
+        const ps = safePS();
         pointState.value = { ...ps, rev: ps.rev + 1 };
     }, 5000);
 };

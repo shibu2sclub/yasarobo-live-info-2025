@@ -14,7 +14,6 @@
     q('#resetAll').addEventListener('click', () => nodecg.sendMessage('results:reset-all'));
 
     let ac = 2; // attemptsCount
-    let lastPlayerId = null;
 
     function fmtMs(ms) {
         ms = Math.max(0, Math.floor(ms || 0));
@@ -35,15 +34,15 @@
         <h3>競技${i}回目</h3>
         <div class="kv"><span>スコア</span><strong class="score">—</strong></div>
         <div class="kv"><span>競技残</span><strong class="time">—</strong></div>
+        <div class="kv"><span>Retry</span><strong class="retry">—</strong></div>
+        <details class="details"><summary>内訳を見る</summary><pre class="mono breakdown">—</pre></details>
         <div class="btns">
           <button class="save">保存（${i}回目）</button>
           <button class="reset danger">リセット（${i}回目）</button>
         </div>
       `;
-            const btnSave = sec.querySelector('.save');
-            const btnReset = sec.querySelector('.reset');
-            btnSave.addEventListener('click', () => nodecg.sendMessage('results:save-attempt', { index: i }));
-            btnReset.addEventListener('click', () => nodecg.sendMessage('results:reset-attempt', { index: i }));
+            sec.querySelector('.save').addEventListener('click', () => nodecg.sendMessage('results:save-attempt', { index: i }));
+            sec.querySelector('.reset').addEventListener('click', () => nodecg.sendMessage('results:reset-attempt', { index: i }));
             elCards.appendChild(sec);
         }
     }
@@ -55,13 +54,39 @@
 
         elCur.textContent = p ? `ID:${p.id} / ${p.robot}` : '（なし）';
 
-        // 各カード
+        const itemOrder = (rules.value?.items || []).map(it => it.key);
+
         const cards = elCards.querySelectorAll('section.card');
         cards.forEach((sec, idx) => {
             const i = idx + 1;
             const entry = rec?.attempts?.[i - 1] || null;
+
             sec.querySelector('.score').textContent = entry ? `${entry.total}点` : '—';
             sec.querySelector('.time').textContent = entry ? fmtMs(entry.matchRemainingMs) : '—';
+            sec.querySelector('.retry').textContent = entry ? String(entry.retryCount ?? 0) : '—';
+
+            // 内訳：key順で ○/× と集計を表示
+            const pre = sec.querySelector('.breakdown');
+            if (!entry) {
+                pre.textContent = '—';
+            } else {
+                const lines = [];
+                for (const key of itemOrder) {
+                    const arr = entry.breakdown?.[key] || [];
+                    const marks = arr.map(v => v ? '○' : '×').join(' ');
+                    const sum = entry.summary?.[key];
+                    const label = (rules.value?.items || []).find(it => it.key === key)?.labelDashboard || key;
+                    const pts = sum ? ` / ${sum.points}pt` : '';
+                    lines.push(`${label}: ${marks} (ok:${sum?.ok ?? 0}, ng:${sum?.ng ?? 0}${pts})`);
+                }
+                // 未定義のキーが保存されていた場合も一応拾う
+                for (const [key, arr] of Object.entries(entry.breakdown || {})) {
+                    if (itemOrder.includes(key)) continue;
+                    const marks = arr.map(v => v ? '○' : '×').join(' ');
+                    lines.push(`${key}: ${marks}`);
+                }
+                pre.textContent = lines.length ? lines.join('\n') : '（内訳なし）';
+            }
         });
 
         // ベスト
@@ -79,11 +104,7 @@
         render();
     });
 
-    current.on('change', (p) => {
-        lastPlayerId = p?.id || null;
-        render();
-    });
-
+    current.on('change', render);
     attempts.on('change', render);
 
     // 初期

@@ -1,31 +1,44 @@
 'use strict';
 
 /**
- * 可変試技回数に対応した結果管理。
+ * 可変試技回数に対応した結果管理（内訳＋リトライ数も保存）。
  *
  * Replicants:
- * - rules: { items: RuleItem[], attemptsCount: number }  ← attemptsCount を使用（既定 2）
+ * - rules: { items: RuleItem[], attemptsCount: number }
+ * - timerState: { stage:'prep'|'match', running:boolean, startEpochMs:number, accumulatedMs:number, matchMs:number }
+ * - pointState: { entries: Record<string, boolean[]>, total:number }
+ * - retryCount: { count:number }
+ * - currentPlayer: { id:string, robot:string, ... }
+ *
  * - attemptsStore (persistent): {
  *     byPlayer: {
  *       [playerId]: {
- *         attempts: (ResultEntry|null)[], // 長さは可変。UI 側は rules.attemptsCount を基準に操作
+ *         attempts: (ResultEntry|null)[],
  *         best: { total:number, matchRemainingMs:number, from:number } | null
  *       }
  *     },
  *     rev:number
  *   }
  *
- * Messages:
- * - results:save-attempt  { index:number }   // 1-based index
- * - results:reset-attempt { index:number }
- * - results:reset-all     {}
+ * ResultEntry:
+ * {
+ *   id:string, ts:number, playerId:string, robot:string,
+ *   total:number, matchRemainingMs:number,
+ *   // ★ 追加保存
+ *   breakdown: { [key:string]: boolean[] },   // その時点の entries を丸ごとスナップショット
+ *   retryCount: number,                       // その時点のリトライ数
+ *   summary?: {                               // 便利用の集計（UI/CSV 用）
+ *     [key:string]: { ok:number, ng:number, points:number }
+ *   }
+ * }
  */
 
 module.exports = (nodecg) => {
-    const rules = nodecg.Replicant('rules');          // from points.js のルール JSON
-    const timerState = nodecg.Replicant('timerState');     // from timer.js
-    const pointState = nodecg.Replicant('pointState');     // from points.js（total と entries）
-    const current = nodecg.Replicant('currentPlayer');  // from player.js
+    const rules = nodecg.Replicant('rules');
+    const timerState = nodecg.Replicant('timerState');
+    const pointState = nodecg.Replicant('pointState');
+    const retryCount = nodecg.Replicant('retryCount');
+    const current = nodecg.Replicant('currentPlayer');
 
     /** @type {import('nodecg/types/replicant').Replicant<{byPlayer:Record<string,{attempts:(any|null)[],best:any|null}>, rev:number}>} */
     const attemptsStore = nodecg.Replicant('attemptsStore', {
@@ -33,9 +46,29 @@ module.exports = (nodecg) => {
         defaultValue: { byPlayer: {}, rev: 0 }
     });
 
-    // ユーティリティ
     const nowId = () =>
         new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14) + '-' + Date.now();
+
+    function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
+
+    function scoreOf(key, ok) {
+        const r = (rules.value?.items || []).find(it => it.key === key);
+        if (!r) return 0;
+        return ok ? (r.pointsCorrect || 0) : (r.pointsWrong || 0);
+    }
+
+    function buildSummary(entries) {
+        const out = {};
+        for (const [key, arr] of Object.entries(entries || {})) {
+            let ok = 0, ng = 0, pts = 0;
+            for (const v of arr) {
+                if (v) ok++; else ng++;
+                pts += scoreOf(key, !!v);
+            }
+            out[key] = { ok, ng, points: pts };
+        }
+        return out;
+    }
 
     function buildEntry() {
         const p = current.value;
@@ -55,21 +88,27 @@ module.exports = (nodecg) => {
             matchRemainingMs = Math.max(0, matchMs);
         }
 
+        // ★ 追加保存項目
+        const breakdown = deepClone(pointState.value?.entries || {});
+        const retry = Number(retryCount.value?.count || 0);
+        const summary = buildSummary(breakdown);
+
         return {
             id: nowId(),
             ts: Date.now(),
             playerId: p.id,
             robot: p.robot,
             total,
-            matchRemainingMs
+            matchRemainingMs,
+            breakdown,
+            retryCount: retry,
+            summary
         };
     }
 
     function computeBest(arr /* (ResultEntry|null)[] */) {
         const list = (arr || []).filter(Boolean);
         if (list.length === 0) return null;
-
-        // 得点が高い方、同点なら残が多い方（インデックスは 1-based）
         let best = { total: -Infinity, matchRemainingMs: -Infinity, from: 1 };
         list.forEach((e, i) => {
             if (e.total > best.total ||
@@ -96,14 +135,13 @@ module.exports = (nodecg) => {
 
         const i = Math.max(1, Math.floor(index)) - 1;
         if (!Array.isArray(rec.attempts)) rec.attempts = [];
-        // 足りないところは null で埋める
         while (rec.attempts.length <= i) rec.attempts.push(null);
 
         rec.attempts[i] = entry;
         rec.best = computeBest(rec.attempts);
 
         attemptsStore.value = { ...store, rev: (store.rev || 0) + 1 };
-        nodecg.log.info(`[attempts] set attempt#${index} for ${p.id} total=${entry?.total ?? '—'} rem=${entry?.matchRemainingMs ?? '—'} bestFrom=${rec.best?.from ?? '—'}`);
+        nodecg.log.info(`[attempts] set attempt#${index} for ${p.id} total=${entry?.total ?? '—'} rem=${entry?.matchRemainingMs ?? '—'} retry=${entry?.retryCount ?? 0}`);
     }
 
     function resetAttempt(index /* 1-based */) {
