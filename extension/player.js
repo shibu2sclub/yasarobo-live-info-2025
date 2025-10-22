@@ -11,7 +11,8 @@ module.exports = (nodecg) => {
      *   teamShort?: string,
      *   teamEn?: string,
      *   order?: number,
-     *   appeal?: string
+     *   appeal?: string,
+     *   ruleId?: string        // ★ 追加：任意のルール一意ID
      * }} PlayerEntry
      * @typedef {PlayerEntry | null} CurrentPlayer
      */
@@ -20,6 +21,10 @@ module.exports = (nodecg) => {
     const timerState = nodecg.Replicant('timerState');
     const pointState = nodecg.Replicant('pointState');
     const retryCount = nodecg.Replicant('retryCount');
+
+    // ルール連動用（ruleslib/rules-manager 構成）
+    const rulesLibrary = nodecg.Replicant('rulesLibrary');   // { items:[{id, meta, rule:{ruleId,...}}], rev }
+    const rulesActiveKey = nodecg.Replicant('rulesActiveKey'); // string|null
 
     /** @type {import('nodecg/types/replicant').Replicant<PlayerEntry[]>} */
     const playerRoster = nodecg.Replicant('playerRoster', {
@@ -49,10 +54,17 @@ module.exports = (nodecg) => {
             teamEn: strOrEmpty(row?.teamEn),
             order: numOrUndef(row?.order),
             appeal: strOrEmpty(row?.appeal),
+            // ★ 追加：CSV/フォームに任意で ruleId を入れられる
+            ruleId: optStr(row?.ruleId),
         };
         return entry;
     }
     function strOrEmpty(v) { return v == null ? '' : String(v); }
+    function optStr(v) {
+        if (v == null) return undefined;
+        const s = String(v).trim();
+        return s ? s : undefined;
+    }
     function numOrUndef(v) {
         if (v === '' || v == null) return undefined;
         const n = Number(v);
@@ -108,7 +120,7 @@ module.exports = (nodecg) => {
                         rev: (s?.rev || 0) + 1
                     };
 
-                    // 得点クリア
+                    // 得点クリア（※現行の pointState 仕様に合わせています）
                     const ps = pointState.value || {};
                     pointState.value = {
                         red: [],
@@ -122,6 +134,19 @@ module.exports = (nodecg) => {
                     // リトライ数クリア
                     const rc = retryCount.value || { count: 0, rev: 0 };
                     retryCount.value = { count: 0, rev: (rc.rev || 0) + 1 };
+
+                    // ★ ルール自動切替：CSVに ruleId があれば、rulesLibrary から一致する rule.ruleId を探して適用
+                    const rid = (p.ruleId || '').trim();
+                    if (rid) {
+                        const lib = rulesLibrary.value || { items: [] };
+                        const found = (lib.items || []).find(doc => (doc.rule?.ruleId || '') === rid);
+                        if (found) {
+                            rulesActiveKey.value = found.id; // → rules-manager が rules を適用＆副作用実行
+                            nodecg.log.info(`[player] auto-switched rule by ruleId="${rid}" -> doc.id=${found.id}`);
+                        } else {
+                            nodecg.log.warn(`[player] ruleId="${rid}" not found in rulesLibrary`);
+                        }
+                    }
                 }
                 break;
             }

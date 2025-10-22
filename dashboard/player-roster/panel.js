@@ -13,6 +13,7 @@
     const elTeamEn = q('#teamEn');
     const elOrder = q('#order');
     const elAppeal = q('#appeal');
+    const elRuleId = q('#ruleId'); // ★ 追加: 任意のルール一意ID
 
     const elList = q('#list');
     const elCount = q('#count');
@@ -39,7 +40,9 @@
             teamShort: elTeamShort.value.trim(),
             teamEn: elTeamEn.value.trim(),
             order: elOrder.value === '' ? undefined : Number(elOrder.value),
-            appeal: elAppeal.value
+            appeal: elAppeal.value,
+            // ★ 追加: 任意の ruleId（空なら undefined として扱われる）
+            ruleId: elRuleId.value.trim() || undefined,
         });
     });
 
@@ -53,7 +56,7 @@
     // 全消去
     q('#clearRoster').addEventListener('click', () => send('clear-roster'));
 
-    // CSV
+    // CSV インポート／エクスポート UI
     const elCsv = q('#csvFile');
     q('#csvImportReplace').addEventListener('click', () => importCsv('replace'));
     q('#csvImportUpsert').addEventListener('click', () => importCsv('upsert'));
@@ -67,16 +70,18 @@
             try {
                 const rows = parseCsv(String(reader.result || ''));
                 if (!rows.length) return alert('有効な行が見つかりません。');
+                // そのまま extension へ
                 send('bulk-set', { mode, rows });
             } catch (e) {
                 console.error(e);
                 alert('CSVの解析に失敗しました。');
             }
         };
-        reader.readAsText(file);
+        reader.readAsText(file, 'utf-8');
     }
 
     // ヘッダ必須。順不同OK。足りない列は空扱い。
+    // サポート列: id, robot, robotShort, robotEn, team, teamShort, teamEn, order, appeal, ruleId
     function parseCsv(text) {
         const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n')
             .map(l => l.trim()).filter(l => l.length > 0);
@@ -102,6 +107,7 @@
                 teamEn: get('teamEn'),
                 order: get('order'),
                 appeal: get('appeal'),
+                ruleId: get('ruleId'), // ★ 追加
             };
             out.push(row);
         }
@@ -109,7 +115,7 @@
     }
 
     function indexBy(header) {
-        const names = ['id', 'robot', 'robotShort', 'robotEn', 'team', 'teamShort', 'teamEn', 'order', 'appeal'];
+        const names = ['id', 'robot', 'robotShort', 'robotEn', 'team', 'teamShort', 'teamEn', 'order', 'appeal', 'ruleId'];
         const map = {};
         for (const n of names) {
             const k = header.findIndex(h => h.toLowerCase() === n.toLowerCase());
@@ -127,7 +133,8 @@
             const ch = line[i];
             if (inQ) {
                 if (ch === `"`) {
-                    if (line[i + 1] === '"') { cur += `"`; i++; } else inQ = false;
+                    if (line[i + 1] === '"') { cur += `"`; i++; }
+                    else inQ = false;
                 } else cur += ch;
             } else {
                 if (ch === `"`) { inQ = true; }
@@ -140,7 +147,7 @@
 
     function exportCsv() {
         const list = currentRoster || [];
-        const header = ['id', 'robot', 'robotShort', 'robotEn', 'team', 'teamShort', 'teamEn', 'order', 'appeal'].join(',');
+        const header = ['id', 'robot', 'robotShort', 'robotEn', 'team', 'teamShort', 'teamEn', 'order', 'appeal', 'ruleId'].join(',');
         const body = list.map(p =>
             [
                 escCsv(p.id),
@@ -152,6 +159,7 @@
                 escCsv(p.teamEn ?? ''),
                 p.order == null ? '' : String(p.order),
                 escCsv(p.appeal ?? ''),
+                escCsv(p.ruleId ?? ''), // ★ 追加
             ].join(',')
         ).join('\n');
         const csv = header + '\n' + body;
@@ -162,6 +170,7 @@
         a.download = `player_roster_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`;
         document.body.appendChild(a); a.click(); a.remove();
     }
+
     function escCsv(s) { s = String(s); const nq = /[",\n]/.test(s); s = s.replace(/"/g, '""'); return nq ? `"${s}"` : s; }
 
     // ─────────────────────────────────────
@@ -182,8 +191,9 @@
             const order = p.order == null ? '-' : String(p.order);
             const team = p.team ? ` / ${p.team}` : '';
             const robot = p.robotShort || p.robot || '';
+            const rule = p.ruleId ? ` [rule:${p.ruleId}]` : ''; // ★ 任意で見やすく
             opt.value = p.id;
-            opt.textContent = `[${order}] ID:${p.id}${team} / ${robot}`;
+            opt.textContent = `[${order}] ID:${p.id}${team} / ${robot}${rule}`;
             elList.appendChild(opt);
         });
         elCount.textContent = String(currentRoster.length);
@@ -217,5 +227,6 @@
         elTeamEn.value = String(rec.teamEn ?? '');
         elOrder.value = rec.order == null ? '' : String(rec.order);
         elAppeal.value = String(rec.appeal ?? '');
+        if (elRuleId) elRuleId.value = String(rec.ruleId ?? '');
     }
 })();

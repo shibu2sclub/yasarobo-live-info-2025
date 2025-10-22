@@ -2,17 +2,8 @@
 
 /**
  * ルールのライブラリ管理（保管庫専任）。
- *
- * Replicants:
- * - rulesLibrary   (persistent): { items: RuleDoc[], rev:number }
- * - rulesActiveKey (persistent): string|null  ← “どれを使うか”のIDだけを管理
- *
- * Messages:
- * - 'ruleslib:replaceAll' { rules: Rule[] }   // 複数インポート（置換）
- * - 'ruleslib:upsert'     { id?, rule: Rule } // 1件追加/上書き
- * - 'ruleslib:remove'     { id }
- * - 'ruleslib:clear'      {}
- * - 'ruleslib:select'     { id }              // アクティブIDの切替（実適用は rules-manager が担当）
+ * - rule.ruleId（任意・一意想定）をそのまま保持する
+ * - 選択は rulesActiveKey の更新のみ（適用は rules-manager）
  */
 
 module.exports = (nodecg) => {
@@ -28,15 +19,18 @@ module.exports = (nodecg) => {
         defaultValue: null
     });
 
-    // ── utils
     function genId() { return `rule-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
 
     function normalizeRule(obj) {
         if (!obj || typeof obj !== 'object') throw new Error('rule JSON must be object');
         const out = {};
+        // ★ 任意の一意ID（選手連動用）
+        out.ruleId = obj.ruleId != null ? String(obj.ruleId).trim() : ''; // 空なら未設定扱い
+
         out.nameDashboard = String(obj.nameDashboard ?? '');
         out.nameGraphics = String(obj.nameGraphics ?? '');
         out.nameGraphicsShortEn = String(obj.nameGraphicsShortEn ?? '');
+
         const col = String(obj.themeColor ?? DEFAULT_COLOR).trim();
         out.themeColor = HEX6.test(col) ? col.toUpperCase() : DEFAULT_COLOR;
 
@@ -62,7 +56,6 @@ module.exports = (nodecg) => {
         return out;
     }
 
-    // ── messages
     nodecg.listenFor('ruleslib:replaceAll', (msg) => {
         const arr = Array.isArray(msg?.rules) ? msg.rules : [];
         const items = arr.map((raw) => {
@@ -72,8 +65,7 @@ module.exports = (nodecg) => {
             return { id, meta: { title, createdAt: Date.now() }, rule };
         });
         rulesLibrary.value = { items, rev: (rulesLibrary.value?.rev || 0) + 1 };
-        // 実適用は rules-manager が行う。ここでは ActiveKey を指すだけ。
-        if (items[0]) rulesActiveKey.value = items[0].id;
+        if (items[0]) rulesActiveKey.value = items[0].id; // 実適用は rules-manager 側
     });
 
     nodecg.listenFor('ruleslib:upsert', (msg) => {
@@ -97,7 +89,7 @@ module.exports = (nodecg) => {
         const list = (lib.items || []).filter(x => x.id !== id);
         rulesLibrary.value = { items: list, rev: (lib.rev || 0) + 1 };
         if (rulesActiveKey.value === id) {
-            rulesActiveKey.value = list[0]?.id ?? null; // 先頭があればそちらへ
+            rulesActiveKey.value = list[0]?.id ?? null;
         }
     });
 
@@ -109,7 +101,6 @@ module.exports = (nodecg) => {
     nodecg.listenFor('ruleslib:select', (msg) => {
         const id = String(msg?.id || '');
         if (!id) return;
-        // 実適用は rules-manager が担当。ここではキーだけ更新。
-        rulesActiveKey.value = id;
+        rulesActiveKey.value = id; // ★ 実適用は rules-manager
     });
 };
