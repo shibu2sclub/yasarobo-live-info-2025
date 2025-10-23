@@ -42,3 +42,16 @@ button:hover {
     font-size: 12px;
     opacity: 0.85;
 }
+
+.rule-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+    color: #fff;
+    /* 白文字固定 */
+    background: #AF1E21;
+    /* デフォルト、JSで上書き */
+    font-size: 12px;
+    letter-spacing: .3px;
+}

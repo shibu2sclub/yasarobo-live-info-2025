@@ -104,3 +104,38 @@
 
     function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
 })();
+
+(function () {
+    const currentPlayer = nodecg.Replicant('currentPlayer');
+    const rulesLibrary = nodecg.Replicant('rulesLibrary');
+
+    const q = (s) => document.querySelector(s);
+    const btnClear = q('#clearRule');
+    const pill = q('#boundRulePill');
+
+    let lib = { items: [] };
+
+    btnClear.addEventListener('click', () => {
+        nodecg.sendMessage('player-control', { action: 'clear-rule-current' });
+    });
+
+    rulesLibrary.on('change', (v) => { lib = v || { items: [] }; render(); });
+    currentPlayer.on('change', render);
+
+    function render() {
+        const p = currentPlayer.value;
+        if (!p || !p.ruleId) {
+            pill.style.display = 'none';
+            return;
+        }
+        // ruleId からルールを引き当てる
+        const doc = (lib.items || []).find(d => (d.rule?.ruleId || '') === p.ruleId);
+        const name = doc?.rule?.nameGraphics || doc?.rule?.nameDashboard || p.ruleId;
+        const color = (doc?.rule?.themeColor || '#AF1E21');
+
+        pill.textContent = name;
+        pill.style.backgroundColor = color;
+        pill.style.color = '#fff';
+        pill.style.display = 'inline-block';
+    }
+})();

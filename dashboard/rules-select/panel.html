@@ -3,37 +3,41 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Rules (Select)</title>
+    <title>Rules Select</title>
     <link rel="stylesheet" href="./panel.css" />
 </head>
 
 <body>
     <div class="wrap">
-        <h2>Rules (Select)</h2>
+        <h2>Rules Select</h2>
 
         <div class="row">
-            <input id="filter" type="text" placeholder="絞り込み（タイトル/英略称など）" />
-            <button id="clearActive">選択解除</button>
+            <input id="filter" type="text" placeholder="フィルター（タイトル / 略称 / ruleId）" />
         </div>
 
         <div class="row">
-            <select id="list" size="10" style="width:100%"></select>
+            <select id="list" size="10" class="list"></select>
         </div>
 
-        <div class="row">
+        <div class="row gap">
             <button id="apply">このルールを適用</button>
+            <button id="clearActive" class="ghost">選択解除</button>
         </div>
 
-        <div class="status">
-            <div><strong>現在のルール:</strong> <span id="active">（なし）</span></div>
-            <div><strong>試技回数:</strong> <span id="ac">—</span></div>
-            <div><strong>リトライ上限:</strong> <span id="rc">—</span></div>
-        </div>
+        <div class="grid">
+            <div class="box">
+                <h3>現在の適用ルール</h3>
+                <div class="kv"><span>Title</span><strong id="active">（未設定）</strong></div>
+                <div class="kv"><span>Attempts</span><strong id="ac">—</strong></div>
+                <div class="kv"><span>Retry</span><strong id="rc">—</strong></div>
+                <p class="hint">※「適用」を押すと、現在選択中の競技者にも指定ルールとして保存されます。</p>
+            </div>
 
-        <details style="margin-top:8px;">
-            <summary>内容プレビュー</summary>
-            <pre id="preview" style="white-space:pre-wrap"></pre>
-        </details>
+            <div class="box">
+                <h3>プレビュー</h3>
+                <pre id="preview" class="preview"></pre>
+            </div>
+        </div>
     </div>
 
     <script src="/nodecg-api.min.js"></script>
