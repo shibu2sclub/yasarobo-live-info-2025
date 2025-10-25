@@ -1,15 +1,18 @@
 'use strict';
 
 /**
- * 可変試技回数に対応した結果管理（内訳＋リトライ数も保存）。
+ * 結果管理（試技ごとの保存＋ベスト算出）
  *
- * Replicants:
- * - rules: { items: RuleItem[], attemptsCount: number }
+ * 追加: 各試技の保存レコードに ruleId（当時のルールの一意ID）を含める
+ *
+ * Replicants we read:
+ * - rules: { ruleId?: string, ... }
  * - timerState: { stage:'prep'|'match', running:boolean, startEpochMs:number, accumulatedMs:number, matchMs:number }
  * - pointState: { entries: Record<string, boolean[]>, total:number }
  * - retryCount: { count:number }
  * - currentPlayer: { id:string, robot:string, ... }
  *
+ * Replicant we write:
  * - attemptsStore (persistent): {
  *     byPlayer: {
  *       [playerId]: {
@@ -20,16 +23,18 @@
  *     rev:number
  *   }
  *
- * ResultEntry:
+ * ResultEntry now:
  * {
- *   id:string, ts:number, playerId:string, robot:string,
- *   total:number, matchRemainingMs:number,
- *   // ★ 追加保存
- *   breakdown: { [key:string]: boolean[] },   // その時点の entries を丸ごとスナップショット
- *   retryCount: number,                       // その時点のリトライ数
- *   summary?: {                               // 便利用の集計（UI/CSV 用）
- *     [key:string]: { ok:number, ng:number, points:number }
- *   }
+ *   id:string,
+ *   ts:number,
+ *   playerId:string,
+ *   robot:string,
+ *   total:number,
+ *   matchRemainingMs:number,
+ *   ruleId?:string,                     // ★ 追加: 当時のルール
+ *   breakdown:{ [key:string]: boolean[] },
+ *   retryCount:number,
+ *   summary?: { [key:string]: { ok:number, ng:number, points:number } }
  * }
  */
 
@@ -76,7 +81,7 @@ module.exports = (nodecg) => {
 
         const total = Number(pointState.value?.total || 0);
 
-        // 競技残（match only）
+        // 残り競技時間
         const s = timerState.value || {};
         const matchMs = Number.isFinite(s.matchMs) ? s.matchMs : 0;
         let matchRemainingMs = matchMs;
@@ -88,10 +93,15 @@ module.exports = (nodecg) => {
             matchRemainingMs = Math.max(0, matchMs);
         }
 
-        // ★ 追加保存項目
+        // breakdown（得点内訳）と retryCount のスナップショット
         const breakdown = deepClone(pointState.value?.entries || {});
         const retry = Number(retryCount.value?.count || 0);
         const summary = buildSummary(breakdown);
+
+        // ★ 追加: ルールIDのスナップ（現在有効な rules の ruleId を丸ごと保存）
+        const usedRuleId = (rules.value && typeof rules.value.ruleId === 'string')
+            ? rules.value.ruleId
+            : undefined;
 
         return {
             id: nowId(),
@@ -100,6 +110,7 @@ module.exports = (nodecg) => {
             robot: p.robot,
             total,
             matchRemainingMs,
+            ruleId: usedRuleId, // ★ここ
             breakdown,
             retryCount: retry,
             summary
@@ -141,7 +152,9 @@ module.exports = (nodecg) => {
         rec.best = computeBest(rec.attempts);
 
         attemptsStore.value = { ...store, rev: (store.rev || 0) + 1 };
-        nodecg.log.info(`[attempts] set attempt#${index} for ${p.id} total=${entry?.total ?? '—'} rem=${entry?.matchRemainingMs ?? '—'} retry=${entry?.retryCount ?? 0}`);
+        nodecg.log.info(
+            `[attempts] set attempt#${index} for ${p.id} total=${entry?.total ?? '—'} rem=${entry?.matchRemainingMs ?? '—'} retry=${entry?.retryCount ?? 0} ruleId=${entry?.ruleId ?? '(none)'}`
+        );
     }
 
     function resetAttempt(index /* 1-based */) {

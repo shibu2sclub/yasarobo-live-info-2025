@@ -35,6 +35,7 @@
         <div class="kv"><span>スコア</span><strong class="score">—</strong></div>
         <div class="kv"><span>競技残</span><strong class="time">—</strong></div>
         <div class="kv"><span>Retry</span><strong class="retry">—</strong></div>
+        <div class="kv"><span>Rule</span><strong class="rule">—</strong></div>
         <details class="details"><summary>内訳を見る</summary><pre class="mono breakdown">—</pre></details>
         <div class="btns">
           <button class="save">保存（${i}回目）</button>
@@ -65,6 +66,11 @@
             sec.querySelector('.time').textContent = entry ? fmtMs(entry.matchRemainingMs) : '—';
             sec.querySelector('.retry').textContent = entry ? String(entry.retryCount ?? 0) : '—';
 
+            // ★ 追加：この記録を取った時のルールID
+            sec.querySelector('.rule').textContent = entry
+                ? (entry.ruleId || '(なし)')
+                : '—';
+
             // 内訳：key順で ○/× と集計を表示
             const pre = sec.querySelector('.breakdown');
             if (!entry) {
@@ -79,7 +85,7 @@
                     const pts = sum ? ` / ${sum.points}pt` : '';
                     lines.push(`${label}: ${marks} (ok:${sum?.ok ?? 0}, ng:${sum?.ng ?? 0}${pts})`);
                 }
-                // 未定義のキーが保存されていた場合も一応拾う
+                // ルール側から消えたkeyが古い記録に残っている場合も拾う
                 for (const [key, arr] of Object.entries(entry.breakdown || {})) {
                     if (itemOrder.includes(key)) continue;
                     const marks = arr.map(v => v ? '○' : '×').join(' ');
