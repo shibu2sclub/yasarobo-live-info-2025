@@ -76,3 +76,28 @@ button.danger {
     background: #b22;
     border-color: #611;
 }
+
+.ruleline {
+    align-items: flex-start;
+}
+
+.rulecell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.rule-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+    color: #fff;
+    /* JSで上書きするが白にしておく */
+    background: #AF1E21;
+    /* デフォルト。JSでrule.themeColorに差し替え */
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: .3px;
+}
