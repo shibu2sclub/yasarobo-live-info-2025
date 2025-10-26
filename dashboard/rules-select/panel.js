@@ -6,7 +6,7 @@
     const q = (s) => document.querySelector(s);
     const elFilter = q('#filter');
     const elList = q('#list');
-    const elActive = q('#active');
+    const elActivePill = q('#activePill'); // ★ pillのDOM
     const elAC = q('#ac');
     const elRC = q('#rc');
     const elPrev = q('#preview');
@@ -14,6 +14,7 @@
     const btnClear = q('#clearActive');
 
     let rawItems = [];
+    let libCache = { items: [] };
 
     // ルール適用：ActiveKey を切り替え、かつ現在選手にも ruleId を書き込む
     btnApply.addEventListener('click', () => {
@@ -29,7 +30,6 @@
         if (rid) {
             nodecg.sendMessage('player-control', { action: 'bind-rule-current', ruleId: rid });
         } else {
-            // ruleId が未設定のルールの場合はスキップ（推奨: ルールJSONに ruleId を付ける）
             console.warn('[rules-select] selected rule has no ruleId; player binding skipped');
         }
     });
@@ -41,7 +41,13 @@
     elList.addEventListener('change', renderPreview);
     elList.addEventListener('dblclick', () => btnApply.click());
 
-    lib.on('change', (v) => { rawItems = v?.items || []; renderList(); });
+    lib.on('change', (v) => {
+        rawItems = v?.items || [];
+        libCache = v || { items: [] };
+        renderList();
+        renderActive(); // ライブラリが変わったときも、ピルの再解決が必要
+    });
+
     act.on('change', renderActive);
     rules.on('change', renderActive);
 
@@ -61,11 +67,13 @@
             .forEach(d => {
                 const opt = document.createElement('option');
                 opt.value = d.id;
+
                 const title = d.meta?.title || d.id;
                 const ac = d.rule?.attemptsCount ?? '?';
                 const rc = d.rule?.retryAttemptsCount ?? '?';
                 const rid = d.rule?.ruleId ? ` {${d.rule.ruleId}}` : '';
                 const abbr = d.rule?.nameGraphicsShortEn ? ` [${d.rule.nameGraphicsShortEn}]` : '';
+
                 opt.textContent = `${title}${abbr}${rid}  (attempts:${ac}, retry:${rc})`;
                 elList.appendChild(opt);
             });
@@ -75,16 +83,59 @@
 
     function renderPreview() {
         const opt = elList.selectedOptions[0];
-        if (!opt) { elPrev.textContent = ''; return; }
+        if (!opt) {
+            elPrev.textContent = '';
+            return;
+        }
         const item = rawItems.find(d => d.id === opt.value);
         elPrev.textContent = item ? JSON.stringify(item.rule, null, 2) : '';
     }
 
+    function findDocByRuleId(ruleId) {
+        if (!ruleId) return null;
+        const items = libCache.items || [];
+        return items.find(doc => (doc.rule?.ruleId || '') === ruleId) || null;
+    }
+
+    function applyRulePill(pillEl, doc) {
+        if (!pillEl) return;
+
+        if (!doc) {
+            // 何も選ばれていない場合や不明な場合
+            pillEl.style.display = 'inline-block';
+            pillEl.style.backgroundColor = '#999';
+            pillEl.style.color = '#fff';
+            pillEl.textContent = '（未設定）';
+            return;
+        }
+
+        const r = doc.rule || {};
+        const label =
+            r.nameGraphics ||
+            r.nameDashboard ||
+            r.nameGraphicsShortEn ||
+            r.ruleId ||
+            '(No Name)';
+        const color = r.themeColor || '#AF1E21';
+
+        pillEl.style.display = 'inline-block';
+        pillEl.style.backgroundColor = color;
+        pillEl.style.color = '#fff';
+        pillEl.textContent = label;
+    }
+
     function renderActive() {
+        // 今アクティブな rules Replicant の情報から
         const r = rules.value || {};
-        const title = r.nameDashboard || r.nameGraphics || r.nameGraphicsShortEn || '（未設定）';
-        elActive.textContent = title;
+
+        // attemptsCount / retryAttemptsCount は従来どおり
         elAC.textContent = String(r.attemptsCount ?? '—');
         elRC.textContent = String(r.retryAttemptsCount ?? '—');
+
+        // 現在の rules.value.ruleId から、rulesLibrary の doc を引いて pill に反映
+        const curRuleId = (typeof r.ruleId === 'string') ? r.ruleId : '';
+        const doc = findDocByRuleId(curRuleId);
+
+        applyRulePill(elActivePill, doc);
     }
 })();

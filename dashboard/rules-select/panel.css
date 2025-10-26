@@ -98,3 +98,28 @@ button.ghost {
     font-size: 12px;
     color: #666;
 }
+
+
+.ruleline {
+    align-items: flex-start;
+}
+
+.rulecell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.rule-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+    color: #fff;
+    background: #AF1E21;
+    /* fallback, JSで上書き */
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: .3px;
+}
