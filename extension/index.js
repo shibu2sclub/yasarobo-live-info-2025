@@ -8,6 +8,7 @@ module.exports = (nodecg) => {
     require('./ruleslib')(nodecg);
     require('./rules-manager')(nodecg);
     require('./ranking')(nodecg);
+    require('./ranking-display')(nodecg);
 
     nodecg.log.info('[yasarobo-live-info-2025] extension initialized (timer/points/player/results/retry/ruleslib loaded)');
 };

@@ -125,6 +125,13 @@
                 "width": 4,
                 "headerColor": "#222",
                 "file": "debug-dump/panel.html"
+            },
+            {
+                "name": "ranking-display",
+                "title": "Ranking Display",
+                "width": 3,
+                "headerColor": "#222",
+                "file": "ranking-display/panel.html"
             }
         ],
         "graphics": [
@@ -136,6 +143,12 @@
             },
             {
                 "file": "onsite-timer/index.html",
+                "width": 800,
+                "height": 120,
+                "singleInstance": false
+            },
+            {
+                "file": "ranking-board/index.html",
                 "width": 800,
                 "height": 120,
                 "singleInstance": false
