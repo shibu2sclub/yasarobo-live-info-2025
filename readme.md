@@ -24,6 +24,9 @@ NodeCGで動作する配信画面と管理ツールです。
      * 運営タブレット端末
          * 運営向けNodeCG操作画面
 
+# ポート開放
+[https://support.borndigital.co.jp/hc/ja/articles/360002711593-Windows10%E3%81%A7%E7%89%B9%E5%AE%9A%E3%81%AE%E3%83%9D%E3%83%BC%E3%83%88%E3%82%92%E9%96%8B%E6%94%BE%E3%81%99%E3%82%8B]
+[https://eset-support.canon-its.jp/faq/show/235?site_domain=default]
 
 # 導入方法
 ## 初期条件
