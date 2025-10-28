@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Ranking</title>
+    <link rel="stylesheet" href="./panel.css" />
+</head>
+
+<body>
+    <div class="wrap">
+        <h2>Ranking</h2>
+
+        <div class="row">
+            <label for="ruleSelect">ルールを選択：</label>
+            <select id="ruleSelect"></select>
+        </div>
+
+        <div class="table-wrap">
+            <table class="ranktable">
+                <thead>
+                    <tr>
+                        <th>順位</th>
+                        <th>ID</th>
+                        <th>ロボット</th>
+                        <th>チーム</th>
+                        <th>得点</th>
+                        <th>残り時間</th>
+                    </tr>
+                </thead>
+                <tbody id="rankBody">
+                    <!-- JSで埋める -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="note">
+            <p>※同点の場合は残り時間（長い方）が上位。</p>
+        </div>
+    </div>
+
+    <script src="/nodecg-api.min.js"></script>
+    <script src="./panel.js"></script>
+</body>
+
+</html>

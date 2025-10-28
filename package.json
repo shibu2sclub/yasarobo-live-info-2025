@@ -111,6 +111,13 @@
                 "headerColor": "#222",
                 "file": "rules-select/panel.html",
                 "workspace": "Committee"
+            },
+            {
+                "name": "ranking",
+                "title": "Ranking",
+                "width": 4,
+                "headerColor": "#222",
+                "file": "ranking/panel.html"
             }
         ],
         "graphics": [
