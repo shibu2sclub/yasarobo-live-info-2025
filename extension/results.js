@@ -121,10 +121,11 @@ module.exports = (nodecg) => {
 
     function setAttempt(index /* 1-based */, entry) {
         const p = current.value;
-        // if (!p || !p.id) {
-        //     nodecg.log.warn('[results] setAttempt(): no current player');
-        //     return;
-        // }
+        if (!p || !p.id) {
+            nodecg.log.warn('[results] setAttempt(): no current player');
+            nodecg.log.info(`[attempts] save skipped: no currentPlayer`);
+            return;
+        }
 
         const store = ensureRecord(p.id);
         const rec = store.byPlayer[p.id];

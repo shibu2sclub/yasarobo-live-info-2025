@@ -2,6 +2,8 @@
     const attemptsStore = nodecg.Replicant('attemptsStore');
     const currentPlayer = nodecg.Replicant('currentPlayer');
     const rules = nodecg.Replicant('rules');
+    const rankingData = nodecg.Replicant('rankingData');
+    const rulesLibrary = nodecg.Replicant('rulesLibrary');
 
     const q = (s) => document.querySelector(s);
     const elDbg = q('#dbgDump'); // ← 追加
@@ -22,6 +24,8 @@
                 attemptsStore.value);
             console.log('[ranking-panel] currentPlayer:', currentPlayer.value);
             console.log('[ranking-panel] rules:', rules.value);
+            console.log('[ranking-panel] rulesLibrary:', rulesLibrary.value);
+            console.log('[ranking-panel] rankingData:', rankingData.value);
         });
     }
 })();
