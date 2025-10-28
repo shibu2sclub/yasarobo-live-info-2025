@@ -118,6 +118,13 @@
                 "width": 4,
                 "headerColor": "#222",
                 "file": "ranking/panel.html"
+            },
+            {
+                "name": "debug-dump",
+                "title": "Debug (Replicant Dump)",
+                "width": 4,
+                "headerColor": "#222",
+                "file": "debug-dump/panel.html"
             }
         ],
         "graphics": [

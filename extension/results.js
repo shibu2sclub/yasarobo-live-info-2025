@@ -2,40 +2,7 @@
 
 /**
  * 結果管理（試技ごとの保存＋ベスト算出）
- *
- * 追加: 各試技の保存レコードに ruleId（当時のルールの一意ID）を含める
- *
- * Replicants we read:
- * - rules: { ruleId?: string, ... }
- * - timerState: { stage:'prep'|'match', running:boolean, startEpochMs:number, accumulatedMs:number, matchMs:number }
- * - pointState: { entries: Record<string, boolean[]>, total:number }
- * - retryCount: { count:number }
- * - currentPlayer: { id:string, robot:string, ... }
- *
- * Replicant we write:
- * - attemptsStore (persistent): {
- *     byPlayer: {
- *       [playerId]: {
- *         attempts: (ResultEntry|null)[],
- *         best: { total:number, matchRemainingMs:number, from:number } | null
- *       }
- *     },
- *     rev:number
- *   }
- *
- * ResultEntry now:
- * {
- *   id:string,
- *   ts:number,
- *   playerId:string,
- *   robot:string,
- *   total:number,
- *   matchRemainingMs:number,
- *   ruleId?:string,                     // ★ 追加: 当時のルール
- *   breakdown:{ [key:string]: boolean[] },
- *   retryCount:number,
- *   summary?: { [key:string]: { ok:number, ng:number, points:number } }
- * }
+ * デバッグログ付き版
  */
 
 module.exports = (nodecg) => {
@@ -45,11 +12,13 @@ module.exports = (nodecg) => {
     const retryCount = nodecg.Replicant('retryCount');
     const current = nodecg.Replicant('currentPlayer');
 
-    /** @type {import('nodecg/types/replicant').Replicant<{byPlayer:Record<string,{attempts:(any|null)[],best:any|null}>, rev:number}>} */
+    /** attemptsStore の Replicant */
     const attemptsStore = nodecg.Replicant('attemptsStore', {
         persistent: true,
         defaultValue: { byPlayer: {}, rev: 0 }
     });
+
+    // ーーーー util ーーーー
 
     const nowId = () =>
         new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14) + '-' + Date.now();
@@ -67,7 +36,8 @@ module.exports = (nodecg) => {
         for (const [key, arr] of Object.entries(entries || {})) {
             let ok = 0, ng = 0, pts = 0;
             for (const v of arr) {
-                if (v) ok++; else ng++;
+                if (v) ok++;
+                else ng++;
                 pts += scoreOf(key, !!v);
             }
             out[key] = { ok, ng, points: pts };
@@ -75,13 +45,21 @@ module.exports = (nodecg) => {
         return out;
     }
 
+    /**
+     * 現在の状態から attempt レコードを1つ作る
+     * - currentPlayer が選ばれてなければ null
+     * - ruleId が取れれば ruleId も含める
+     */
     function buildEntry() {
         const p = current.value;
-        if (!p || !p.id) return null;
+        if (!p || !p.id) {
+            // nodecg.log.warn('[results] buildEntry(): currentPlayer missing or has no id', p);
+            return null;
+        }
 
         const total = Number(pointState.value?.total || 0);
 
-        // 残り競技時間
+        // 残り競技時間の計算
         const s = timerState.value || {};
         const matchMs = Number.isFinite(s.matchMs) ? s.matchMs : 0;
         let matchRemainingMs = matchMs;
@@ -93,28 +71,29 @@ module.exports = (nodecg) => {
             matchRemainingMs = Math.max(0, matchMs);
         }
 
-        // breakdown（得点内訳）と retryCount のスナップショット
         const breakdown = deepClone(pointState.value?.entries || {});
         const retry = Number(retryCount.value?.count || 0);
         const summary = buildSummary(breakdown);
 
-        // ★ 追加: ルールIDのスナップ（現在有効な rules の ruleId を丸ごと保存）
         const usedRuleId = (rules.value && typeof rules.value.ruleId === 'string')
             ? rules.value.ruleId
             : undefined;
 
-        return {
+        const entry = {
             id: nowId(),
             ts: Date.now(),
             playerId: p.id,
             robot: p.robot,
             total,
             matchRemainingMs,
-            ruleId: usedRuleId, // ★ここ
+            ruleId: usedRuleId,
             breakdown,
             retryCount: retry,
             summary
         };
+
+        // nodecg.log.info('[results] buildEntry(): built entry =', entry);
+        return entry;
     }
 
     function computeBest(arr /* (ResultEntry|null)[] */) {
@@ -122,8 +101,10 @@ module.exports = (nodecg) => {
         if (list.length === 0) return null;
         let best = { total: -Infinity, matchRemainingMs: -Infinity, from: 1 };
         list.forEach((e, i) => {
-            if (e.total > best.total ||
-                (e.total === best.total && e.matchRemainingMs > best.matchRemainingMs)) {
+            if (
+                e.total > best.total ||
+                (e.total === best.total && e.matchRemainingMs > best.matchRemainingMs)
+            ) {
                 best = { total: e.total, matchRemainingMs: e.matchRemainingMs, from: i + 1 };
             }
         });
@@ -140,7 +121,11 @@ module.exports = (nodecg) => {
 
     function setAttempt(index /* 1-based */, entry) {
         const p = current.value;
-        if (!p || !p.id) return;
+        // if (!p || !p.id) {
+        //     nodecg.log.warn('[results] setAttempt(): no current player');
+        //     return;
+        // }
+
         const store = ensureRecord(p.id);
         const rec = store.byPlayer[p.id];
 
@@ -152,14 +137,23 @@ module.exports = (nodecg) => {
         rec.best = computeBest(rec.attempts);
 
         attemptsStore.value = { ...store, rev: (store.rev || 0) + 1 };
+
+        // nodecg.log.info(
+        //     `[results] setAttempt(): saved attempt#${index} for ${p.id}, score=${entry?.total}, time=${entry?.matchRemainingMs}, ruleId=${entry?.ruleId}`
+        // );
         nodecg.log.info(
             `[attempts] set attempt#${index} for ${p.id} total=${entry?.total ?? '—'} rem=${entry?.matchRemainingMs ?? '—'} retry=${entry?.retryCount ?? 0} ruleId=${entry?.ruleId ?? '(none)'}`
         );
+        // nodecg.log.info('[results] attemptsStore after save =', attemptsStore.value);
     }
 
     function resetAttempt(index /* 1-based */) {
         const p = current.value;
-        if (!p || !p.id) return;
+        if (!p || !p.id) {
+            // nodecg.log.warn('[results] resetAttempt(): no current player');
+            return;
+        }
+
         const store = ensureRecord(p.id);
         const rec = store.byPlayer[p.id];
 
@@ -169,32 +163,53 @@ module.exports = (nodecg) => {
         rec.best = computeBest(rec.attempts);
 
         attemptsStore.value = { ...store, rev: (store.rev || 0) + 1 };
+        // nodecg.log.info(`[results] resetAttempt(): cleared attempt#${index} for ${p.id}`);
         nodecg.log.info(`[attempts] reset attempt#${index} for ${p.id}`);
     }
 
     function resetAll() {
         const p = current.value;
-        if (!p || !p.id) return;
+        if (!p || !p.id) {
+            // nodecg.log.warn('[results] resetAll(): no current player');
+            return;
+        }
         const store = ensureRecord(p.id);
         store.byPlayer[p.id] = { attempts: [], best: null };
         attemptsStore.value = { ...store, rev: (store.rev || 0) + 1 };
+        // nodecg.log.info(`[results] resetAll(): cleared all attempts for ${p.id}`);
         nodecg.log.info(`[attempts] reset all for ${p?.id}`);
+
     }
 
-    // メッセージ
+    // メッセージハンドラ
     nodecg.listenFor('results:save-attempt', (msg) => {
         const idx = Number(msg?.index);
-        if (!Number.isFinite(idx) || idx < 1) return;
+        if (!Number.isFinite(idx) || idx < 1) {
+            // nodecg.log.warn('[results] save-attempt: invalid index', msg);
+            return;
+        }
+
+        // nodecg.log.info('[results] save-attempt received for index', idx);
+
         const entry = buildEntry();
-        if (!entry) return;
+        if (!entry) {
+            // nodecg.log.warn('[results] save-attempt aborted: entry is null');
+            return;
+        }
+
         setAttempt(idx, entry);
     });
 
     nodecg.listenFor('results:reset-attempt', (msg) => {
         const idx = Number(msg?.index);
-        if (!Number.isFinite(idx) || idx < 1) return;
+        if (!Number.isFinite(idx) || idx < 1) {
+            // nodecg.log.warn('[results] reset-attempt: invalid index', msg);
+            return;
+        }
         resetAttempt(idx);
     });
 
-    nodecg.listenFor('results:reset-all', () => resetAll());
+    nodecg.listenFor('results:reset-all', () => {
+        resetAll();
+    });
 };
