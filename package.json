@@ -132,6 +132,13 @@
                 "width": 3,
                 "headerColor": "#222",
                 "file": "ranking-display/panel.html"
+            },
+            {
+                "name": "graphics-display",
+                "title": "Graphics Display",
+                "width": 3,
+                "headerColor": "#222",
+                "file": "graphics-display/panel.html"
             }
         ],
         "graphics": [
@@ -151,6 +158,18 @@
                 "file": "ranking-board/index.html",
                 "width": 800,
                 "height": 120,
+                "singleInstance": false
+            },
+            {
+                "file": "test1/index.html",
+                "width": 800,
+                "height": 200,
+                "singleInstance": false
+            },
+            {
+                "file": "test2/index.html",
+                "width": 800,
+                "height": 200,
                 "singleInstance": false
             }
         ]
