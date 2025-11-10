@@ -1,0 +1,110 @@
+/* ==== NodeCG graphics 固定サイズ設定 ==== */
+/* ここを bundle.json の graphics 設定に合わせて変えてください */
+:root {
+    --panel-width: 1920px;
+    --panel-height: 1080px;
+
+    /* マスク用の巨大な正方形の一辺。1920x1080くらいなら4000pxで十分 */
+    --mask-size: 4000px;
+
+    /* アニメーション時間 */
+    --diag-duration: 0.6s;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: var(--panel-width);
+    height: var(--panel-height);
+    overflow: hidden;
+    background: transparent;
+    /* OBSで透過したい場合 */
+}
+
+/* 独自タグそのものを「パネル1枚」として扱う */
+diagonal-mask {
+    display: block;
+    position: relative;
+    width: var(--panel-width);
+    height: var(--panel-height);
+    overflow: hidden;
+}
+
+/* ビューポート：ここからはみ出したものは見えない */
+.diag-mask__viewport {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+/* 45°回転した巨大なマスク。高さをアニメーションさせる */
+.diag-mask__wipe-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--mask-size);
+    height: 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+    transform-origin: center;
+    overflow: hidden;
+
+    animation-duration: var(--diag-duration);
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+/* .active が付いているとき = 表示アニメ */
+diagonal-mask.active .diag-mask__wipe-wrapper {
+    animation-name: diag-show;
+}
+
+/* .active がないとき = 非表示アニメ */
+diagonal-mask:not(.active) .diag-mask__wipe-wrapper {
+    animation-name: diag-hide;
+}
+
+/* 中身本体。ここに元のHTMLが全部入る（複製しない） */
+.diag-mask__content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--panel-width);
+    height: var(--panel-height);
+
+    /* 中身を逆回転して正しい向きに戻す */
+    transform: translate(-50%, -50%) rotate(-45deg);
+
+    /* 中身の背景などは、あなたの main.css 側で設定してOK */
+}
+
+/* 表示アニメ：高さ0 → フルサイズ */
+@keyframes diag-show {
+    0% {
+        height: 0;
+        visibility: visible;
+    }
+
+    100% {
+        height: var(--mask-size);
+        visibility: visible;
+    }
+}
+
+/* 非表示アニメ：フルサイズ → 高さ0 → 最後に visibility hidden */
+@keyframes diag-hide {
+    0% {
+        height: var(--mask-size);
+        visibility: visible;
+    }
+
+    99% {
+        height: 0;
+        visibility: visible;
+    }
+
+    100% {
+        height: 0;
+        visibility: hidden;
+    }
+}

@@ -1,3 +1,11 @@
+:root {
+    --panel-width: 640px;
+    --panel-height: 360px;
+    --mask-size: 1000px;
+}
+
+
+
 /* graphics/test1/style.css */
 html,
 body {
@@ -8,16 +16,10 @@ body {
 }
 
 .graphics-root {
-    display: none;
-    /* ← デフォルト非表示 */
     width: 100%;
     height: 100%;
     place-items: center;
-}
-
-.graphics-root.active {
-    display: block;
-    /* ← activeが付いたら表示 */
+    background-color: aquamarine;
 }
 
 .box {
