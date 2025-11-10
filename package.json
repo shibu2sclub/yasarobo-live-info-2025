@@ -11,14 +11,14 @@
             {
                 "name": "timer-control",
                 "title": "Timer Control",
-                "width": 6,
+                "width": 5,
                 "headerColor": "#222",
                 "file": "timer-control/panel.html"
             },
             {
                 "name": "timer-control_",
                 "title": "Timer Control",
-                "width": 6,
+                "width": 5,
                 "headerColor": "#222",
                 "file": "timer-control/panel.html",
                 "workspace": "Referee"

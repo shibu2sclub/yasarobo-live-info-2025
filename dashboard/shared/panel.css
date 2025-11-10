@@ -1,0 +1,100 @@
+.wrap {
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans JP", sans-serif;
+    padding: 12px;
+}
+
+h2 {
+    margin: 0 0 10px;
+    font-size: 16px;
+}
+
+h3 {
+    margin: 0 0 8px;
+    font-size: 14px;
+}
+
+.row {
+    margin: 8px 0;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 12px;
+    background: #fff;
+}
+
+.btns {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #222;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    filter: brightness(1.1);
+}
+
+button.warn {
+    background: #a66;
+    border-color: #533;
+}
+
+button.danger {
+    background: #b22;
+    border-color: #611;
+}
+
+button.ghost {
+    background: #f6f6f6;
+    color: #222;
+    border-color: #bbb;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: none;
+    /* hoverの明るさ変化を無効化 */
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.rule-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+    color: #fff;
+    /* JSで上書きするが白にしておく */
+    background: #AF1E21;
+    /* デフォルト。JSでrule.themeColorに差し替え */
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: .3px;
+}
