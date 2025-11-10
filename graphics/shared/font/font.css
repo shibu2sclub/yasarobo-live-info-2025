@@ -1,0 +1,45 @@
+@font-face {
+    font-family: 'BIZUDPGothic';
+    font-weight: 400;
+    src: url(/bundles/yasarobo-live-info-2025/graphics/shared/font/BIZ_UDPGothic/BIZUDPGothic-Regular.ttf) format('truetype');
+}
+
+@font-face {
+    font-family: 'BIZUDPGothic';
+    font-weight: 700;
+    src: url(/bundles/yasarobo-live-info-2025/graphics/shared/font/BIZ_UDPGothic/BIZUDPGothic-Bold.ttf) format('truetype');
+}
+
+@font-face {
+    font-family: 'Quicksand';
+    font-weight: 700;
+    src: url(/bundles/yasarobo-live-info-2025/graphics/shared/font/Quicksand/static/Quicksand-Bold.ttf) format('truetype');
+}
+
+@font-face {
+    font-family: 'Quicksand';
+    font-weight: 600;
+    src: url(/bundles/yasarobo-live-info-2025/graphics/shared/font/Quicksand/static/Quicksand-SemiBold.ttf) format('truetype');
+}
+
+@font-face {
+    font-family: 'Quicksand';
+    font-weight: 500;
+    src: url(/bundles/yasarobo-live-info-2025/graphics/shared/font/Quicksand/static/Quicksand-Medium.ttf) format('truetype');
+}
+
+@font-face {
+    font-family: 'Quicksand';
+    font-weight: 400;
+    src: url(/bundles/yasarobo-live-info-2025/graphics/shared/font/Quicksand/static/Quicksand-Regular.ttf) format('truetype');
+}
+
+@font-face {
+    font-family: 'Quicksand';
+    font-weight: 300;
+    src: url(/bundles/yasarobo-live-info-2025/graphics/shared/font/Quicksand/static/Quicksand-Light.ttf) format('truetype');
+}
+
+html, body {
+    font-family: 'Quicksand', 'BIZUDPGothic', sans-serif;
+}
