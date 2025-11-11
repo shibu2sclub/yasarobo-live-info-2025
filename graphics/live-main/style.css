@@ -103,12 +103,13 @@ div.timer {
     font-size: 70px;
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 9px;
     align-items: baseline;
 }
 
 div.timer span {
     font-size: 35px;
+    width: 40px;
 }
 
 div.logo-wrapper {
