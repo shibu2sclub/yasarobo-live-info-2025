@@ -12,7 +12,7 @@
         // live-main 側（SCOREの近くに）
         const liveEl = $('retryLive');
         if (liveEl) {
-            liveEl.textContent = `RETRY: ${n}`;
+            liveEl.textContent = `${n}`;
         }
 
         // onsite-timer 側（span#retry の innerText を書き換える）

@@ -8,6 +8,6 @@
         const el = $('points');
         if (!el) return;
         const total = Number(v?.total || 0);
-        el.textContent = `SCORE: ${total}`;
+        el.textContent = `${total}`;
     });
 })();

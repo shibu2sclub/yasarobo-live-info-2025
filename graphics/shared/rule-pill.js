@@ -11,12 +11,11 @@
         const color = (v?.themeColor || '#AF1E21').toUpperCase();
         // #RRGGBB でなければデフォルトにフォールバック
         const bg = /^#([0-9A-F]{6})$/i.test(color) ? color : '#AF1E21';
+        pill.style.color = '#FFFFFF'; // 常に白文字
 
         if (short) {
             pill.textContent = short;
             pill.style.backgroundColor = bg;
-            pill.style.display = 'inline-block';
-            pill.style.color = '#FFFFFF'; // 常に白文字
         } else {
             pill.style.display = 'none';
         }
