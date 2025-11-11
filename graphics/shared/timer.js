@@ -37,7 +37,7 @@
         const s = Math.floor((cs % 6000) / 100);
         const c = cs % 100;
         // 秒とセンチ秒の間にスペース、センチ秒を小さく
-        return `${String(m)}:${String(s).padStart(2, '0')}<span> ${String(c).padStart(2, '0')}</span>`;
+        return `<span><span class = "timer-min">${String(m)}</span>:<span class = "timer-sec">${String(s).padStart(2, '0')}</span></span><span class = "timer-ms"> ${String(c).padStart(2, '0')}</span>`;
     }
 
     function statusText(rem) {

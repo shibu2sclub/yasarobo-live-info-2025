@@ -58,7 +58,7 @@ body {
 	transform: skewX(-10deg);
 }
 
-.countdown_txt > span {
+.countdown_txt > span.timer-ms {
 	font-size: calc(11800vw / 980);
 	margin-left: calc(-500vw / 980);
 }

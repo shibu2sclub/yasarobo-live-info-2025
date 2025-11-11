@@ -107,7 +107,7 @@ div.timer {
     align-items: baseline;
 }
 
-div.timer span {
+div.timer span.timer-ms {
     font-size: 35px;
     width: 40px;
 }
