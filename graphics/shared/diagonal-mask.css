@@ -5,7 +5,7 @@
     --panel-height: 1080px;
 
     /* マスク用の巨大な正方形の一辺。1920x1080くらいなら4000pxで十分 */
-    --mask-size: 4000px;
+    --mask-size: calc(1.6 * max(var(--panel-width), var(--panel-height)));
 
     /* アニメーション時間 */
     --diag-duration: 0.6s;

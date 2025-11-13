@@ -3,7 +3,6 @@
 
     /* 以下は全体のwrapper */
     --panel-height: 800px;
-    --mask-size: 2000px;
 }
 
 body {
@@ -53,11 +52,11 @@ div.rule-box {
 
 
 .mask-ranking-title-wrap {
-    height: 115px;
+    --panel-height: 115px;
 }
 
 .mask-rank-content-wrap {
-    height: 55px;
+    --panel-height: 55px;
 }
 
 div.rank-content {

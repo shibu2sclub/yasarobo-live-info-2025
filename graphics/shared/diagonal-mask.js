@@ -23,7 +23,7 @@ class DiagonalMask extends HTMLElement {
 
         if (maskClass != null) {
             this.classList.add(maskClass);
-            // wipeWrapper.classList.add(maskClass);
+            wipeWrapper.classList.add(maskClass);
             viewport.classList.add(maskClass);
             contentWrapper.classList.add(maskClass);
         }
