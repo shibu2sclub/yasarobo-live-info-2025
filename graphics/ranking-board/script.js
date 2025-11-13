@@ -43,7 +43,7 @@
             const sec = document.createElement('section');
             sec.className = 'rank-card';
             sec.innerHTML = `
-                <diagonal-mask class = "rank-content-wrap active" mask-class = "mask-rank-content-wrap">
+                <diagonal-mask class = "rank-content-wrap" mask-class = "mask-rank-content-wrap">
                     <div class = "rank-content">
                         <div class="rank-pos">${i + 1}</div>
                         <div class="id">${row.playerId || ''}</div>
@@ -66,16 +66,37 @@
 (function () {
     const vis = nodecg.Replicant('graphicsVisibility');
     const rankingWrap = document.getElementById('ranking-wrap');
+    const rankingTitleWrap = document.getElementById("ranking-title-wrap");
 
     vis.on('change', (v = {}) => {
         const visible = !!v.rankingBoard;
+
+        const rankingContentWraps = rankingWrap.querySelectorAll('.rank-content-wrap');
         if (visible) {
             rankingWrap.classList.add('no-animation');
+            rankingTitleWrap.classList.remove('no-animation');
             rankingWrap.classList.add('active');
+            rankingTitleWrap.classList.add('active');
+            setTimeout(() => {
+                rankingContentWraps.forEach((el, i) => {
+                    setTimeout(() => {
+                        el.classList.remove('no-animation');
+                        el.classList.add('active');
+                    }, i * 100);
+                });
+            }, 600);
         }
         else {
             rankingWrap.classList.remove('no-animation');
+            rankingTitleWrap.classList.add('no-animation');
             rankingWrap.classList.remove('active');
+            setTimeout(() => {
+                rankingTitleWrap.classList.remove('active');
+                rankingContentWraps.forEach((el) => {
+                    el.classList.add('no-animation');
+                    el.classList.remove('active');
+                });
+            }, 600);
         }
     });
 })();
