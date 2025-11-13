@@ -12,18 +12,20 @@
 </head>
 
 <body>
-    <diagonal-mask class = "active ranking-wrap" mask-class = "mask-ranking-wrap">
-        <diagonal-mask class = "active ranking-title-wrap" mask-class = "mask-ranking-title-wrap">
-            <div class = "ranking-title">
-                <div class="title-box">LEADERBOARD</div>
-                <div class="rule-box" id="rulePill">-</div>
+    <section id = "ranking-whole">
+        <diagonal-mask class = "active ranking-wrap" mask-class = "mask-ranking-wrap">
+            <diagonal-mask class = "active ranking-title-wrap" mask-class = "mask-ranking-title-wrap">
+                <div class = "ranking-title">
+                    <div class="title-box">LEADERBOARD</div>
+                    <div class="rule-box" id="rulePill">-</div>
+                </div>
+            </diagonal-mask>
+
+            <div class="ranks" id = "ranks">
+                <!-- ランキング項目がここに入る -->
             </div>
         </diagonal-mask>
-
-        <div class="ranks" id = "ranks">
-            <!-- ランキング項目がここに入る -->
-        </div>
-    </diagonal-mask>
+    </section>
 
     <script src="../shared/diagonal-mask.js"></script>
     <script src="/nodecg-api.min.js"></script>
