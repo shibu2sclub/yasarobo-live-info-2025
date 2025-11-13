@@ -6,19 +6,26 @@
     <title>Ranking Board</title>
 
     <!-- 同じフォント系を共有しておくと見た目は揃いやすい -->
-    <link rel="stylesheet" href="../shared/style.css" />
+    <link rel="stylesheet" href="../shared/diagonal-mask.css" />
+    <link rel="stylesheet" href="../shared/font/font.css" />
     <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
-    <div class="ranking-wrap">
-        <div class="rule-pill" id="rulePill">RULE-NAME</div>
+    <diagonal-mask class = "ranking-wrap active">
+        <diagonal-mask class = "ranking-title-wrap active">
+            <div class = "ranking-title">
+                <div class="title-box">LEADERBOARD</div>
+                <div class="rule-box" id="rulePill">-</div>
+            </div>
+        </diagonal-mask>
 
         <div class="ranks" id = "ranks">
             <!-- ランキング項目がここに入る -->
         </div>
-    </div>
+    </diagonal-mask>
 
+    <script src="../shared/diagonal-mask.js"></script>
     <script src="/nodecg-api.min.js"></script>
     <script src="./script.js"></script>
 </body>
