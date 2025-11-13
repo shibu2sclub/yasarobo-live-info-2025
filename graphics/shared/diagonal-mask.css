@@ -55,13 +55,21 @@ diagonal-mask {
 }
 
 /* .active が付いているとき = 表示アニメ */
-diagonal-mask.active .diag-mask__wipe-wrapper {
+diagonal-mask.active:not(.no-animation) .diag-mask__wipe-wrapper {
     animation-name: diag-show;
 }
 
 /* .active がないとき = 非表示アニメ */
-diagonal-mask:not(.active) .diag-mask__wipe-wrapper {
+diagonal-mask:not(.active):not(.no-animation) .diag-mask__wipe-wrapper {
     animation-name: diag-hide;
+}
+
+diagonal-mask.active.no-animation .diag-mask__wipe-wrapper {
+    height: var(--mask-size);
+}
+
+diagonal-mask:not(.active).no-animation .diag-mask__wipe-wrapper {
+    height: 0;
 }
 
 /* 中身本体。ここに元のHTMLが全部入る（複製しない） */

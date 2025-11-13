@@ -62,3 +62,20 @@
 
     render();
 })();
+
+(function () {
+    const vis = nodecg.Replicant('graphicsVisibility');
+    const rankingWrap = document.getElementById('ranking-wrap');
+
+    vis.on('change', (v = {}) => {
+        const visible = !!v.rankingBoard;
+        if (visible) {
+            rankingWrap.classList.add('no-animation');
+            rankingWrap.classList.add('active');
+        }
+        else {
+            rankingWrap.classList.remove('no-animation');
+            rankingWrap.classList.remove('active');
+        }
+    });
+})();

@@ -23,6 +23,7 @@
     // Replicant反映
     vis.on('change', (v = {}) => {
         updateRow('liveMain', !!v.liveMain);
+        updateRow('rankingBoard', !!v.rankingBoard);
         updateRow('test1', !!v.test1);
         updateRow('test2', !!v.test2);
     });
