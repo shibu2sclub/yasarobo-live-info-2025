@@ -3,12 +3,25 @@
 
     /* 以下は全体のwrapper */
     --panel-height: 800px;
-    --mask-size: 1200px;
+    --mask-size: 2000px;
 }
 
 body {
     color: white;
     font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+diagonal-mask.ranking-title-wrap {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+div.ranks {
+    position: absolute;
+    top: 150px;
+    left: 0;
 }
 
 div.ranking-title {
@@ -35,4 +48,77 @@ div.rule-box {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+
+
+.mask-ranking-title-wrap {
+    height: 115px;
+}
+
+.mask-rank-content-wrap {
+    height: 55px;
+}
+
+div.rank-content {
+    width: 100%;
+    height: 55px;
+    background: black;
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+div.rank-content > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+    font-size: 25px;
+    font-weight: 500;
+}
+
+div.rank-content div.rank-pos, div.rank-content div.score {
+    background-color: rgba(15,15,15,0.9);
+}
+
+div.rank-content div.score {
+    width: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+div.rank-content div.score > div {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 7px;
+}
+
+div.rank-content div.score > div >  div:first-child {
+    font-size: 35px;
+}
+
+div.rank-content div.score > div >  div:last-child {
+    font-size: 16px;
+}
+
+div.rank-content div.rank-pos {
+    width: 32px;
+}
+
+div.rank-content div.id, div.rank-content div.time {
+    background-color: rgba(35, 35, 35, 0.8);
+}
+
+div.rank-content div.id {
+    width: 72px;
+}
+
+div.rank-content div.time {
+    flex: 1;
 }

@@ -43,16 +43,14 @@
             const sec = document.createElement('section');
             sec.className = 'rank-card';
             sec.innerHTML = `
-                <div class="rank-pos">${i + 1}</div>
-                <div class="rank-main">
-                    <div class="id">${row.playerId || ''}</div>
-                    <div class="robot">${row.robotShort || row.robot || ''}</div>
-                    <div class="team">${row.teamShort || row.team || ''}</div>
-                </div>
-                <div class="rank-stats">
-                    <div class="score">${row.total ?? 0}</div>
-                    <div class="time">${fmtMs(row.matchRemainingMs ?? 0)}</div>
-                </div>
+                <diagonal-mask class = "rank-content-wrap active" mask-class = "mask-rank-content-wrap">
+                    <div class = "rank-content">
+                        <div class="rank-pos">${i + 1}</div>
+                        <div class="id">${row.playerId || ''}</div>
+                        <div class="score"><div><div>${row.total ?? 0}</div><div>pts</div></div></div>
+                        <div class="time">${fmtMs(row.matchRemainingMs ?? 0)}</div>
+                    </div>
+                </diagonal-mask>
             `;
             elRanks.appendChild(sec);
         });
