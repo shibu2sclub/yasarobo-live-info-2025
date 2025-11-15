@@ -159,18 +159,6 @@
                 "width": 800,
                 "height": 120,
                 "singleInstance": false
-            },
-            {
-                "file": "test1/index.html",
-                "width": 800,
-                "height": 200,
-                "singleInstance": false
-            },
-            {
-                "file": "test2/index.html",
-                "width": 800,
-                "height": 200,
-                "singleInstance": false
             }
         ]
     },
