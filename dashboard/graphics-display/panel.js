@@ -1,3 +1,30 @@
+const graphicsList = [
+    {
+        "name": 'live-main',
+        "id": 'liveMain'
+    },
+    {
+        "name": 'ranking-board',
+        "id": 'rankingBoard'
+    }
+]
+
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('graphics-container');
+    graphicsList.forEach((elem) => {
+        const el = document.createElement('div');
+        el.innerHTML = `
+        <div class="row" data-id="${elem.id}">
+            <div class="label">${elem.name}</div>
+            <div class="status" id="st-${elem.id}">hidden</div>
+            <button data-action="show" data-target="${elem.id}">表示</button>
+            <button class="secondary" data-action="hide" data-target="${elem.id}">非表示</button>
+        </div>
+        `;
+        container.appendChild(el);
+    });
+});
+
 // dashboard/graphics-display/panel.js
 (function () {
     const vis = nodecg.Replicant('graphicsVisibility');
@@ -22,8 +49,9 @@
 
     // Replicant反映
     vis.on('change', (v = {}) => {
-        updateRow('liveMain', !!v.liveMain);
-        updateRow('rankingBoard', !!v.rankingBoard);
+        graphicsList.forEach((elem) => {
+            updateRow(elem.id, v[elem.id]);
+        });
     });
 
     function updateRow(id, visible) {
