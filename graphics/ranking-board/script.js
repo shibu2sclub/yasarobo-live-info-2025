@@ -39,6 +39,7 @@
         // ランキングリスト更新
         elRanks.innerHTML = '';
         const list = rid ? cacheRanking.byRule?.[rid] || [] : [];
+        let c = 0;
         list.forEach((row, i) => {
             const sec = document.createElement('section');
             sec.className = 'rank-card';
@@ -53,7 +54,11 @@
                 </diagonal-mask>
             `;
             elRanks.appendChild(sec);
+            c += 1;
         });
+        const wholeHeight = 150 + c * 55;
+        const styleEl = document.querySelector('style');
+        styleEl.textContent = `:root { --panel-height: ${wholeHeight}px; }`;
     }
 
     rankingData.on('change', (v) => { cacheRanking = v || { byRule: {} }; render(); });
