@@ -13,7 +13,12 @@
             "labelGraphics": "Ball (L)",
             "pointsCorrect": 1,
             "pointsWrong": 0,
-            "cap": 12
+            "cap": 12,
+            "icon": {
+                "type": "round",
+                "color": "#666"
+            },
+            "themeColor": "#666"
         },
         {
             "key": "rBallRed",
@@ -21,7 +26,12 @@
             "labelGraphics": "Red (R)",
             "pointsCorrect": 6,
             "pointsWrong": 2,
-            "cap": 4
+            "cap": 4,
+            "icon": {
+                "type": "round",
+                "color": "#FF4747"
+            },
+            "themeColor": "#FF4747"
         },
         {
             "key": "rBallYellow",
@@ -29,7 +39,12 @@
             "labelGraphics": "Yellow (R)",
             "pointsCorrect": 6,
             "pointsWrong": 2,
-            "cap": 4
+            "cap": 4,
+            "icon": {
+                "type": "round",
+                "color": "#ECD720"
+            },
+            "themeColor": "#ECD720"
         },
         {
             "key": "rBallBlue",
@@ -37,7 +52,12 @@
             "labelGraphics": "Blue (R)",
             "pointsCorrect": 6,
             "pointsWrong": 2,
-            "cap": 4
+            "cap": 4,
+            "icon": {
+                "type": "round",
+                "color": "#4759FF"
+            },
+            "themeColor": "#4759FF"
         },
         {
             "key": "sponge",
@@ -45,7 +65,12 @@
             "labelGraphics": "Sponge ball",
             "pointsCorrect": 4,
             "pointsWrong": 0,
-            "cap": 3
+            "cap": 3,
+            "icon": {
+                "type": "round",
+                "color": "#aaa"
+            },
+            "themeColor": "#aaa"
         },
         {
             "key": "original",
@@ -53,7 +78,13 @@
             "labelGraphics": "Bonus",
             "pointsCorrect": 1,
             "pointsWrong": 0,
-            "cap": 15
+            "cap": 15,
+            "icon": {
+                "type": "round",
+                "color": "white",
+                "borderColor": "#444"
+            },
+            "themeColor": "#444"
         }
     ],
     "maxPoints": 99

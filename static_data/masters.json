@@ -13,7 +13,12 @@
             "labelGraphics": "Red ball",
             "pointsCorrect": 4,
             "pointsWrong": 1,
-            "cap": 6
+            "cap": 6,
+            "icon": {
+                "type": "round",
+                "color": "#FF4747"
+            },
+            "themeColor": "#FF4747"
         },
         {
             "key": "blue",
@@ -21,7 +26,12 @@
             "labelGraphics": "Blue ball",
             "pointsCorrect": 4,
             "pointsWrong": 1,
-            "cap": 2
+            "cap": 2,
+            "icon": {
+                "type": "round",
+                "color": "#4759FF"
+            },
+            "themeColor": "#4759FF"
         },
         {
             "key": "stealcan",
@@ -29,7 +39,12 @@
             "labelGraphics": "Can (Steel)",
             "pointsCorrect": 6,
             "pointsWrong": 1,
-            "cap": 3
+            "cap": 3,
+            "icon": {
+                "type": "square",
+                "color": "#ECD720"
+            },
+            "themeColor": "#ECD720"
         },
         {
             "key": "alumican",
@@ -37,7 +52,12 @@
             "labelGraphics": "Can (Aluminum)",
             "pointsCorrect": 10,
             "pointsWrong": 1,
-            "cap": 1
+            "cap": 1,
+            "icon": {
+                "type": "square",
+                "color": "#ECD720"
+            },
+            "themeColor": "#ECD720"
         },
         {
             "key": "pet",
@@ -45,7 +65,12 @@
             "labelGraphics": "Water Bottle",
             "pointsCorrect": 15,
             "pointsWrong": 0,
-            "cap": 1
+            "cap": 1,
+            "icon": {
+                "type": "diamond",
+                "color": "white"
+            },
+            "themeColor": "#444"
         },
         {
             "key": "free",
@@ -53,7 +78,13 @@
             "labelGraphics": "Tennis",
             "pointsCorrect": 5,
             "pointsWrong": 0,
-            "cap": 1
+            "cap": 1,
+            "icon": {
+                "type": "round",
+                "color": "linear-gradient(135deg, #ECD71C 49%, white 50%)",
+                "borderColor": "#8B8B00;"
+            },
+            "themeColor": "#8B8B00"
         }
     ]
 }

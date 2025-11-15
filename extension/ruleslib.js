@@ -48,14 +48,23 @@ module.exports = (nodecg) => {
         out.items = obj.items.map((it, i) => {
             if (!it || typeof it !== 'object') throw new Error(`items[${i}] invalid`);
             if (!it.key) throw new Error(`items[${i}].key required`);
-            return {
+
+            let itemOut = {
                 key: String(it.key),
                 labelDashboard: String(it.labelDashboard ?? it.key),
                 labelGraphics: String(it.labelGraphics ?? it.key),
                 pointsCorrect: Number(it.pointsCorrect ?? 0),
                 pointsWrong: Number(it.pointsWrong ?? 0),
-                cap: Number(it.cap ?? 0)
-            };
+                cap: Number(it.cap ?? 0),
+            }
+
+            if (it.themeColor != undefined) {
+                itemOut.themeColor = it.themeColor;
+            }
+            if (it.icon != undefined) {
+                itemOut.icon = it.icon;
+            }
+            return itemOut;
         });
         return out;
     }

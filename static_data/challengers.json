@@ -13,7 +13,12 @@
             "labelGraphics": "Red",
             "pointsCorrect": 3,
             "pointsWrong": 1,
-            "cap": 5
+            "cap": 5,
+            "icon": {
+                "type": "round",
+                "color": "#FF4747"
+            },
+            "themeColor": "#FF4747"
         },
         {
             "key": "yellow",
@@ -21,7 +26,12 @@
             "labelGraphics": "Yellow",
             "pointsCorrect": 3,
             "pointsWrong": 1,
-            "cap": 5
+            "cap": 5,
+            "icon": {
+                "type": "round",
+                "color": "#ECD720"
+            },
+            "themeColor": "#ECD720"
         },
         {
             "key": "blue",
@@ -29,7 +39,12 @@
             "labelGraphics": "Blue",
             "pointsCorrect": 3,
             "pointsWrong": 1,
-            "cap": 5
+            "cap": 5,
+            "icon": {
+                "type": "round",
+                "color": "#4759FF"
+            },
+            "themeColor": "#4759FF"
         },
         {
             "key": "free",
@@ -37,7 +52,13 @@
             "labelGraphics": "Tennis",
             "pointsCorrect": 5,
             "pointsWrong": 0,
-            "cap": 1
+            "cap": 1,
+            "icon": {
+                "type": "round",
+                "color": "linear-gradient(135deg, #ECD71C 49%, white 50%)",
+                "borderColor": "#8B8B00;"
+            },
+            "themeColor": "#8B8B00"
         }
     ]
 }
