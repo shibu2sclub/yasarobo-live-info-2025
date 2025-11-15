@@ -40,6 +40,10 @@ module.exports = (nodecg) => {
         const rc = Number(obj.retryAttemptsCount ?? 3);
         out.retryAttemptsCount = (Number.isFinite(rc) && rc >= 0) ? Math.floor(rc) : 3;
 
+        if (obj.maxPoints != undefined) {
+            out.maxPoints = Number(obj.maxPoints);
+        }
+
         if (!Array.isArray(obj.items)) throw new Error('items must be array');
         out.items = obj.items.map((it, i) => {
             if (!it || typeof it !== 'object') throw new Error(`items[${i}] invalid`);

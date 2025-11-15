@@ -70,6 +70,17 @@ div.points-wrapper {
     position: relative;
 }
 
+div.points-box {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 20px;
+}
+
+div.max-points {
+    font-size: 40px;
+}
+
 div.retry-wrapper {
     position: absolute;
     top: 0;

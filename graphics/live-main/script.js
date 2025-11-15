@@ -8,21 +8,6 @@
         // root.classList.toggle('visible', visible); // ← visibleも使いたかったらこれもON
     });
 })();
-
-// pointState.total を購読して #points のテキストを更新
-(function () {
-    const ps = nodecg.Replicant('pointState');
-
-    function $(id) { return document.getElementById(id); }
-
-    ps.on('change', (v) => {
-        const el = $('points');
-        if (!el) return;
-        const total = Number(v?.total || 0);
-        el.textContent = `${total}`;
-    });
-})();
-
 // currentPlayer を購読して live-main に平文表示
 (function () {
     const cur = nodecg.Replicant('currentPlayer');
@@ -61,7 +46,38 @@
         } else {
             pill.style.display = 'none';
         }
+
+
+        const maxEl = document.getElementById('max-points');
+        let max = 0;
+        console.log(v?.maxPoints);
+        if (v?.maxPoints != undefined) {
+            max = Number(v?.maxPoints || 0);
+        }
+        else {
+            const rules = nodecg.Replicant('rules');
+            for (const r of (rules.value?.items || [])) {
+                if (typeof r.cap === 'number' && r.cap > 0) {
+                    const pc = typeof r.pointsCorrect === 'number' ? r.pointsCorrect : 0;
+                    max += pc * r.cap;
+                }
+            }
+        }
+        maxEl.textContent = `${max}`;
     }
 
     rules.on('change', applyRule);
+})();
+
+
+// pointState.total を購読して #points のテキストを更新
+(function () {
+    const ps = nodecg.Replicant('pointState');
+
+    const el = document.getElementById('points');
+
+    ps.on('change', (v) => {
+        const total = Number(v?.total || 0);
+        el.textContent = `${total}`;
+    });
 })();
