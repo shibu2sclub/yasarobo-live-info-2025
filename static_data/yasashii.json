@@ -8,36 +8,53 @@
     "retryAttemptsCount": 3,
     "items": [
         {
-            "key": "red",
-            "labelDashboard": "赤",
-            "labelGraphics": "Red ball",
-            "pointsCorrect": 4,
-            "pointsWrong": 1,
-            "cap": 6
+            "key": "lBall",
+            "labelDashboard": "左エリア",
+            "labelGraphics": "Ball (L)",
+            "pointsCorrect": 1,
+            "pointsWrong": 0,
+            "cap": 12
         },
         {
-            "key": "blue",
-            "labelDashboard": "青",
-            "labelGraphics": "Blue ball",
-            "pointsCorrect": 4,
-            "pointsWrong": 1,
-            "cap": 2
-        },
-        {
-            "key": "stealcan",
-            "labelDashboard": "鉄缶",
-            "labelGraphics": "Can (Steel)",
+            "key": "rBallRed",
+            "labelDashboard": "右エリア赤",
+            "labelGraphics": "Red (R)",
             "pointsCorrect": 6,
-            "pointsWrong": 1,
+            "pointsWrong": 2,
+            "cap": 4
+        },
+        {
+            "key": "rBallYellow",
+            "labelDashboard": "右エリア黄",
+            "labelGraphics": "Yellow (R)",
+            "pointsCorrect": 6,
+            "pointsWrong": 2,
+            "cap": 4
+        },
+        {
+            "key": "rBallBlue",
+            "labelDashboard": "右エリア青",
+            "labelGraphics": "Blue (R)",
+            "pointsCorrect": 6,
+            "pointsWrong": 2,
+            "cap": 4
+        },
+        {
+            "key": "sponge",
+            "labelDashboard": "スポンジボール",
+            "labelGraphics": "Sponge ball",
+            "pointsCorrect": 4,
+            "pointsWrong": 0,
             "cap": 3
         },
         {
-            "key": "free",
-            "labelDashboard": "自由",
-            "labelGraphics": "Tennis",
-            "pointsCorrect": 5,
+            "key": "original",
+            "labelDashboard": "オリジナリティボーナス",
+            "labelGraphics": "Bonus",
+            "pointsCorrect": 1,
             "pointsWrong": 0,
-            "cap": 1
+            "cap": 15
         }
-    ]
+    ],
+    "maxPoints": 99
 }
