@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Point Detail</title>
+    <link rel="stylesheet" href="../shared/diagonal-mask.css" />
+    <link rel="stylesheet" href="../shared/font/font.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <diagonal-mask id="visible-root" class="active">
+        <div class="graphics-root">
+            <div class="title">
+                Point Information
+            </div>
+            <div class="row">
+                <div class="icon-box">
+                    <div class="icon-red"></div>
+                </div>
+                <div class="point-info-box">
+                    <div>
+                        <div id="red-point">13</div>
+                        <div class="point-total">/</div>
+                        <div id="red-total" class="point-total">15</div>
+                    </div>
+                </div>
+                <div class="point-order-box">
+                    <div class="point-table">
+                        <div class="point-table-item">〇</div>
+                        <div class="point-table-item">〇</div>
+                        <div class="point-table-item">〇</div>
+                        <div class="point-table-item">〇</div>
+                        <div class="point-table-item feature">〇</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </diagonal-mask>
+    <script src="../shared/diagonal-mask.js"></script>
+    <script src="/nodecg-api.min.js"></script>
+    <script src="../shared/timer.js"></script>
+    <script src="../shared/retry-display.js"></script>
+
+    <script src="./script.js"></script>
+
+</body>
+
+</html>
