@@ -123,4 +123,10 @@ div.point-table-item {
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
+}
+
+div.point-table-item.feature {
+    border-bottom: 10px solid transparent;
+    padding-top: 10px;
 }
