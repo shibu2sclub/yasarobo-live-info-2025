@@ -3,34 +3,109 @@
     --panel-height: 375px;
 }
 
+body {
+    color: white;
+    font-weight: 500;
+}
+
 div.graphics-root {
-    width: 450px;
+    width: var(--panel-width);
     background-color: rgba(0, 0, 0, 0.75);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+div.title {
+    font-size: 40px;
+    height: 60px;
+    line-height: 60px;
+    padding: 0 12px;
+    box-sizing: border-box;
+}
+
+div.graphics-root>div {
+    width: 100%;
+}
+
+div.graphics-root>div.row {
+    height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+div.graphics-root>div.row>div {
+    height: 100%;
+}
+
 div.graphics-root>div:nth-child(even) {
     background-color: rgba(255, 255, 255, 0.28);
 }
 
+div.icon-box {
+    width: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+div.icon {
+    width: 30px;
+    height: 30px;
+    border: 3px solid transparent;
+    box-sizing: border-box;
+}
+
+div.icon.circle {
+    border-radius: 50%;
+}
+
+/*div.icon.square {
+
+}*/
+
+div.icon.diamond {
+    width: 25px;
+    height: 25px;
+    transform: rotate(45deg);
+}
+
 div.point-info-box {
     background-color: rgba(255, 255, 255, 0.1);
+    width: 120px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-div.point-info-box > div {
+div.point-info {
     display: flex;
     justify-content: center;
     align-items: baseline;
     font-size: 40px;
+    gap: 8px;
+}
+
+div.point-info > div:nth-child(1) {
+    width: 42px;
+    text-align: right;
+}
+
+div.point-info > div:nth-child(3) {
+    width: 24px;
+    text-align: left;
 }
 
 div.point-total {
     font-size: 25px;
+}
+
+div.point-order-box {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 div.point-table {
