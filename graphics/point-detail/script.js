@@ -79,15 +79,17 @@
 
             const rowDiv = document.createElement('div');
             rowDiv.classList.add("row");
+            const bc = ruleItem.icon.borderColor;
+            const c = ruleItem.icon.color;
             rowDiv.innerHTML = `
                 <div class="icon-box">
-                    <div class="icon circle" style="background-color: #FF4747;"></div>
+                    <div class="icon ${ruleItem.icon.type}" style="${c.indexOf('gradient') == -1 ? `background-color: ${c};` : `background-image: ${c};`} ${bc != undefined ? `border: 4px solid ${bc}` : ''}"></div>
                 </div>
                 <div class="point-info-box">
                     <div class="point-info">
-                        <div id="red-point">13</div>
+                        <div id="red-point">${s.points}</div>
                         <div class="point-total">/</div>
-                        <div id="red-total" class="point-total">15</div>
+                        <div id="red-total" class="point-total">${ruleItem.pointsCorrect * ruleItem.cap}</div>
                     </div>
                 </div>
                 <div class="point-order-box">
@@ -104,7 +106,7 @@
             i++;
         });
 
-        const styleElement = document.createElement('style');
+        const styleElement = document.querySelector('style');
         styleElement.innerHTML = `
             :root {
                 --row-num: ${i};

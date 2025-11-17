@@ -61,11 +61,9 @@ div.icon-box {
 div.icon {
     width: 30px;
     height: 30px;
-    border: 3px solid transparent;
-    box-sizing: border-box;
 }
 
-div.icon.circle {
+div.icon.round {
     border-radius: 50%;
 }
 
