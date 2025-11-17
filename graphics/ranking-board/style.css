@@ -2,7 +2,14 @@
     --panel-width: 320px;
 
     /* 以下は全体のwrapper */
-    --panel-height: 800px;
+    --panel-height: calc(var(--title-height) + var(--title-margin) + var(--rank-height) * var(--rank-item-num));
+
+
+    --title-height: 115px;
+    --title-margin: 35px;
+    --rank-height: 55px;
+
+    --rank-item-num: 2; /* JSで書き換えて計算 */
 }
 
 body {
@@ -19,7 +26,7 @@ diagonal-mask.ranking-title-wrap {
 
 div.ranks {
     position: absolute;
-    top: 150px;
+    top: calc(var(--title-height) + var(--title-margin));
     left: 0;
 
     display: flex;
@@ -28,7 +35,7 @@ div.ranks {
 
 div.ranking-title {
     width: var(--panel-width);
-    height: 115px;
+    height: var(--title-height);
     display: flex;
     flex-direction: column;
 }
@@ -55,16 +62,16 @@ div.rule-box {
 
 
 .mask-ranking-title-wrap {
-    --panel-height: 115px;
+    --panel-height: var(--title-height);
 }
 
 .mask-rank-content-wrap {
-    --panel-height: 55px;
+    --panel-height: var(--rank-height);
 }
 
 div.rank-content {
     width: 100%;
-    height: 55px;
+    height: var(--rank-height);
     background: black;
     color: white;
 

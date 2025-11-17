@@ -56,9 +56,8 @@
             elRanks.appendChild(sec);
             c += 1;
         });
-        const wholeHeight = 150 + c * 55;
         const styleEl = document.querySelector('style');
-        styleEl.textContent = `:root { --panel-height: ${wholeHeight}px; }`;
+        styleEl.textContent = `:root { --rank-item-num: ${c}; }`;
     }
 
     rankingData.on('change', (v) => { cacheRanking = v || { byRule: {} }; render(); });
