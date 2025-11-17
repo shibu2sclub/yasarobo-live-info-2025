@@ -121,8 +121,8 @@
                 itemDiv.classList.add('point-table-item');
                 if (j < arr.length) {
                     itemDiv.textContent = arr[j] ? '〇' : '×';
-                } else {
-                    itemDiv.textContent = '';
+                } else if (j < ruleItem?.cap) {
+                    itemDiv.textContent = '-';
                 }
                 pointTableElement.appendChild(itemDiv);
             }

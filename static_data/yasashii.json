@@ -80,7 +80,7 @@
             "pointsWrong": 0,
             "cap": 15,
             "icon": {
-                "type": "round",
+                "type": "diamond",
                 "color": "white",
                 "borderColor": "#444"
             },
