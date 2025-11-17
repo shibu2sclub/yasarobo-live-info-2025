@@ -135,6 +135,7 @@
         styleElement.innerHTML = `
             :root {
                 --row-num: ${i};
+                --point-table-item-num: ${maxCap};
             }
         `
     }
