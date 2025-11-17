@@ -43,7 +43,7 @@ div.row {
     justify-content: center;
 }
 
-div.graphics-root>div.row>div {
+div.row>div {
     height: 100%;
 }
 
