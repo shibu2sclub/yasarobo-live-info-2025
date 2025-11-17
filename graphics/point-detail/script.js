@@ -47,9 +47,20 @@
         return summary;
     }
 
+    function rulesMaxCap(rs) {
+        let maxCap = 0;
+        (rs.items || []).forEach((it) => {
+            maxCap = it.cap>maxCap ? it.cap : maxCap;
+        });
+
+        return maxCap;
+    }
+
     function render() {
         const ps = cachePoint || {};
         const rs = cacheRules || {};
+
+        const maxCap = rulesMaxCap(rs);
 
         // elRuleName.textContent = fmtRuleName(rs);
         // elTotalScore.textContent = String(ps.total ?? 0);
@@ -94,14 +105,28 @@
                 </div>
                 <div class="point-order-box">
                     <div class="point-table">
+                        <!--<div class="point-table-item">〇</div>
                         <div class="point-table-item">〇</div>
                         <div class="point-table-item">〇</div>
                         <div class="point-table-item">〇</div>
-                        <div class="point-table-item">〇</div>
-                        <div class="point-table-item feature" style="border-color: #FF4747">〇</div>
+                        <div class="point-table-item feature" style="border-color: #FF4747">〇</div>-->
                     </div>
                 </div>
             `;
+
+            const pointTableElement = rowDiv.getElementsByClassName('point-table')[0];
+            pointTableElement.innerHTML = '';
+            for (let j = 0; j < maxCap; j++) {
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('point-table-item');
+                if (j < arr.length) {
+                    itemDiv.textContent = arr[j] ? '〇' : '×';
+                } else {
+                    itemDiv.textContent = '';
+                }
+                pointTableElement.appendChild(itemDiv);
+            }
+
             contentElement.appendChild(rowDiv);
             i++;
         });
