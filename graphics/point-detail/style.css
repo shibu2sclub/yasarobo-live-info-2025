@@ -1,6 +1,13 @@
 :root {
-    --panel-width: 450px;
-    --panel-height: 375px;
+    --panel-width: calc(200px + var(--point-table-item-width) * var(--point-table-item-num));  /* 変数をJSで書き換えて計算 */
+    --panel-height: calc(var(--title-height) + var(--row-height) * var(--row-num));  /* 変数をJSで書き換えて計算 */
+
+    --title-height: 60px;
+    --row-height: 75px;
+    --point-table-item-width: 50px;
+
+    --row-num: 1;   /* JSで書き換え */
+    --point-table-item-num: 5;  /* JSで書き換え */
 }
 
 body {
@@ -18,8 +25,8 @@ div.graphics-root {
 
 div.title {
     font-size: 40px;
-    height: 60px;
-    line-height: 60px;
+    height: var(--title-height);
+    line-height: var(--title-height);
     padding: 0 12px;
     box-sizing: border-box;
 }
@@ -28,8 +35,9 @@ div.graphics-root>div {
     width: 100%;
 }
 
-div.graphics-root>div.row {
-    height: 75px;
+div.row {
+    width: 100%;
+    height: var(--row-height);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -44,7 +52,7 @@ div.graphics-root>div:nth-child(even) {
 }
 
 div.icon-box {
-    width: 75px;
+    width: var(--row-height);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -118,7 +126,7 @@ div.point-table {
 }
 
 div.point-table-item {
-    width: 50px;
+    width: var(--point-table-item-width);
     height: 100%;
     display: flex;
     align-items: center;

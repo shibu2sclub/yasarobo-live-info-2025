@@ -6,6 +6,10 @@ const graphicsList = [
     {
         "name": 'ranking-board',
         "id": 'rankingBoard'
+    },
+    {
+        "name": 'point-detail',
+        "id": 'pointDetail'
     }
 ]
 
