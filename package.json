@@ -165,6 +165,12 @@
                 "width": 800,
                 "height": 120,
                 "singleInstance": false
+            },
+            {
+                "file": "player-dbg/index.html",
+                "width": 800,
+                "height": 120,
+                "singleInstance": false
             }
         ]
     },
