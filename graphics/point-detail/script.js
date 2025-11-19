@@ -7,6 +7,9 @@
     let cachePoint = null;
     let cacheRules = null;
 
+
+    let cacheBeforePoint = pointState.value;
+
     /*function fmtRuleName(rule) {
         if (!rule) return '—';
         return (
@@ -67,6 +70,8 @@
 
         // 内訳テーブル
         const entries = ps.entries || {};
+        const beforeEntries = cacheBeforePoint?.entries || {};
+
         const ruleItems = rs.items || [];
         const summary = computeSummary(entries, ruleItems);
 
@@ -80,13 +85,12 @@
         let i = 0;
         keys.forEach((key) => {
             const arrRaw = entries[key];
+            const beforeArrRaw = beforeEntries[key];
             const arr = Array.isArray(arrRaw) ? arrRaw : [];
+            const beforeArr = Array.isArray(beforeArrRaw) ? beforeArrRaw : [];
             const s = summary[key] || { ok: 0, ng: 0, points: 0 };
 
             const ruleItem = ruleItems.find((it) => it.key === key);
-            const label = ruleItem?.labelGraphics || ruleItem?.labelDashboard || key;
-
-            const marks = arr.map((v) => (v ? '○' : '×')).join(' ');
 
             const rowDiv = document.createElement('div');
             rowDiv.classList.add("row");
@@ -104,13 +108,7 @@
                     </div>
                 </div>
                 <div class="point-order-box">
-                    <div class="point-table">
-                        <!--<div class="point-table-item">〇</div>
-                        <div class="point-table-item">〇</div>
-                        <div class="point-table-item">〇</div>
-                        <div class="point-table-item">〇</div>
-                        <div class="point-table-item feature" style="border-color: #FF4747">〇</div>-->
-                    </div>
+                    <div class="point-table"></div>
                 </div>
             `;
 
@@ -121,6 +119,10 @@
                 itemDiv.classList.add('point-table-item');
                 if (j < arr.length) {
                     itemDiv.textContent = arr[j] ? '〇' : '×';
+                    if (beforeArr[j] == undefined || beforeArr[j] !== arr[j]) {
+                        itemDiv.classList.add('feature');
+                        itemDiv.style.borderColor = '#FF4747';
+                    }
                 } else if (j < ruleItem?.cap) {
                     itemDiv.textContent = '-';
                 }
@@ -142,6 +144,10 @@
 
     pointState.on('change', (v) => {
         cachePoint = v || null;
+
+        if (v.total <= 0) {
+            cacheBeforePoint = v;   // 0点：リセットと判定して履歴リセット
+        }
         render();
     });
     rules.on('change', (v) => {
@@ -150,14 +156,21 @@
     });
 
     render();
-})();
 
-(function () {
+
     const vis = nodecg.Replicant('graphicsVisibility');
     const visibleRoot = document.getElementById('visible-root');
 
     vis.on('change', (v = {}) => {
         const visible = !!v.pointDetail;
+
+        if (!visible) {
+            cacheBeforePoint = pointState.value;    // 非表示になった最初の時点の履歴を保存：差分を表示
+        }
+
+        else {
+            render();
+        }
         visibleRoot.classList.toggle('active', visible);
     });
 })();
