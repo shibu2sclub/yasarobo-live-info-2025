@@ -94,7 +94,8 @@
 
     function $(id) { return document.getElementById(id); }
 
-    function render(v) {
+    function render(v, pv) {
+        if (v?.count === pv?.count) return;
         const n = v?.count ?? 0;
 
         const newRetryDiv = document.createElement("div");
