@@ -74,7 +74,8 @@ div.points-box {
     display: flex;
     justify-content: center;
     align-items: baseline;
-    gap: 15px;
+    gap: 20px;
+    transform: translateY(-8px);
 }
 
 div.points {
