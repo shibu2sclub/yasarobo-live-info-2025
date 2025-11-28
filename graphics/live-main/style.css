@@ -96,8 +96,16 @@ div.retry-wrapper {
     width: 100px;
 }
 
-div.retry-wrapper span.retryLive {
+div.retry-wrapper div.retryLive {
     margin-left: 3px;
+    width: 14px;
+    height: 26px;
+    line-height: 26px;
+}
+
+div.retry-wrapper div.retryLive > div {
+    width: 14px;
+    text-align: center;
 }
 
 div.timer-wrapper {

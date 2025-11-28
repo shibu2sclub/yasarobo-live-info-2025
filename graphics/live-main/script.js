@@ -81,3 +81,23 @@
         el.textContent = `${total}`;
     });
 })();
+
+
+// retryCount を購読して、live-main と onsite-timer の表示を更新する。
+// - live-main: #retryLive に "RETRY: n" 表示（要素があれば）
+// - onsite-timer: #retry の innerText を n にする（要素があれば）
+(function () {
+    const retry = nodecg.Replicant('retryCount');
+
+    function $(id) { return document.getElementById(id); }
+
+    function render(v) {
+        const n = v?.count ?? 0;
+
+        const newRetryDiv = document.createElement("div");
+        newRetryDiv.textContent = `${n}`;
+        showNextDom(document.getElementById("retryLive"), newRetryDiv);
+    }
+
+    retry.on('change', render);
+})();

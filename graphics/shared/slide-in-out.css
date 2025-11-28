@@ -1,0 +1,36 @@
+.slide-box {
+    position: relative;
+    overflow: hidden;
+}
+
+.slide-box > div {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.slide-box > .out {
+    animation: slideUpOut 0.5s forwards ease-in-out;
+}
+
+.slide-box > .in {
+    animation: slideUpIn 0.5s forwards ease-in-out;
+}
+
+@keyframes slideUpOut {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-120%);
+    }
+}
+
+@keyframes slideUpIn {
+    0% {
+        transform: translateY(120%);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}

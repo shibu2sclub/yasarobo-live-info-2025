@@ -6,6 +6,7 @@
     <title>Live Main</title>
     <link rel="stylesheet" href="../shared/diagonal-mask.css" />
     <link rel="stylesheet" href="../shared/font/font.css" />
+    <link rel="stylesheet" href="../shared/slide-in-out.css" />
     <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -19,13 +20,13 @@
             <div id="robotName" class="robot-wrapper"></div>
             <div class="points-wrapper">
                 <div class = "points-box">
-                    <div id="points" class = "points">-</div>
+                    <div id="points" class = "points slide-box"></div>
                     <div class = "max-points">/</div>
                     <div id = "max-points" class = "max-points">-</div>
                 </div>
 
                 <div class="retry-wrapper">
-                    Retry:<span id="retryLive" class = "retryLive">0</span>
+                    Retry:<div id="retryLive" class = "retryLive slide-box"></div>
                 </div>
             </div>
             <div class="timer-wrapper">
@@ -37,9 +38,9 @@
         </div>
     </diagonal-mask>
     <script src="../shared/diagonal-mask.js"></script>
+    <script src="../shared/slide-in-out.js"></script>
     <script src="/nodecg-api.min.js"></script>
     <script src="../shared/timer.js"></script>
-    <script src="../shared/retry-display.js"></script>
 
     <script src="./script.js"></script>
 
