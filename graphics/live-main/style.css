@@ -71,26 +71,36 @@ div.points-wrapper {
 }
 
 div.points-box {
-    display: flex;
-    justify-content: center;
-    align-items: baseline;
-    gap: 20px;
-    transform: translateY(-8px);
+    position: relative;
+    height: 100%;
 }
 
 div.points {
-    width: 125px;
-    height: 92px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 120px;
+    height: 100px;
 }
 
 div.points > div {
-    width: 125px;
-    height: 90px;
+    width: 120px;
+    height: 100px;
+    right: 0;
+    line-height: 100px;
     text-align: right;
 }
 
-div.max-points {
+div.max-points-box {
     font-size: 40px;
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+}
+
+div.point-margin {
+    width: 125px;
+    height: 80px;
 }
 
 div.retry-wrapper {
