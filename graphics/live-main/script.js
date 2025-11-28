@@ -74,11 +74,14 @@
 (function () {
     const ps = nodecg.Replicant('pointState');
 
-    const el = document.getElementById('points');
+    ps.on('change', (v, pv) => {
+        if (v?.total != pv?.total) {
+            const total = Number(v?.total || 0);
 
-    ps.on('change', (v) => {
-        const total = Number(v?.total || 0);
-        el.textContent = `${total}`;
+            const newPointDiv = document.createElement("div");
+            newPointDiv.textContent = `${total}`;
+            showNextDom(document.getElementById("points"), newPointDiv);
+        }
     });
 })();
 
