@@ -167,6 +167,12 @@
                 "singleInstance": false
             },
             {
+                "file": "robot-info/index.html",
+                "width": 1920,
+                "height": 1080,
+                "singleInstance": false
+            },
+            {
                 "file": "player-dbg/index.html",
                 "width": 1920,
                 "height": 1080,
