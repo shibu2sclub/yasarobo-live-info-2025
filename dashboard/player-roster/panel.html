@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 
@@ -12,7 +13,7 @@
     <div class="wrap">
         <h2>Player (Roster / CSV)</h2>
 
-        <!-- 入力フォーム（追加フィールド） -->
+        <!-- 基本情報 -->
         <div class="row">
             <label>ID</label>
             <input id="pid" type="text" placeholder="1234" />
@@ -35,10 +36,24 @@
             <input id="order" type="number" min="1" step="1" placeholder="1" />
         </div>
 
+        <!-- 新フィールド追加 -->
         <div class="row">
-            <label>Appeal</label>
-            <input id="appeal" type="text" placeholder="〇〇に挑戦します！" style="width: 100%;" />
-            <button id="add">追加/上書き</button>
+            <label>Movement</label>
+            <input id="movement" type="text" placeholder="例) 4輪独立" style="width:100px;" />
+
+            <label>Tech</label>
+            <input id="tech" type="text" placeholder="例) SLAM+PID" style="width:120px;" />
+
+            <label>Power</label>
+            <input id="power" type="text" placeholder="例) LiPo 3S" style="width:100px;" />
+
+            <label>Comment</label>
+            <input id="comment" type="text" placeholder="自由記述（改行可）" style="flex:1;" />
+        </div>
+
+        <!-- 追加 / 上書きボタン -->
+        <div class="row">
+            <button id="add">追加 / 上書き</button>
         </div>
 
         <!-- CSV 操作 -->
@@ -49,9 +64,13 @@
             <button id="csvExport">CSV書き出し</button>
             <span class="count">登録数: <strong id="count">0</strong></span>
         </div>
+
         <p class="hint">
-            CSVはヘッダ必須（順不同OK）：<br />
-            <code>id,robot,robotShort,robotEn,team,teamShort,teamEn,order,appeal</code>
+            CSVはヘッダ必須（順不同OK）:<br>
+            <code>
+                id,robot,robotShort,robotEn,team,teamShort,teamEn,order,
+                movement,tech,power,comment
+            </code>
         </p>
 
         <!-- 名簿リスト -->
@@ -59,15 +78,14 @@
             <select id="list" size="10" style="width:100%"></select>
         </div>
 
-        <!-- 削除 -->
         <div class="row">
             <button id="remove" class="warn">選択行を削除</button>
             <button id="clearRoster" class="danger">名簿を全消去</button>
         </div>
+
     </div>
 
     <script src="/nodecg-api.min.js"></script>
     <script src="./panel.js"></script>
 </body>
-
 </html>

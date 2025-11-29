@@ -1,232 +1,142 @@
 (function () {
     const roster = nodecg.Replicant('playerRoster');
 
-    const q = (s) => document.querySelector(s);
+    const q = s => document.querySelector(s);
 
-    // 入力欄
+    // [📝 既存フォーム] ※ appeal削除のため一切含まない
     const elId = q('#pid');
-    const elRobot = q('#robot');
-    const elRobotShort = q('#robotShort');
-    const elRobotEn = q('#robotEn');
-    const elTeam = q('#team');
-    const elTeamShort = q('#teamShort');
-    const elTeamEn = q('#teamEn');
-    const elOrder = q('#order');
-    const elAppeal = q('#appeal');
-    const elRuleId = q('#ruleId'); // ★ 追加: 任意のルール一意ID
+    const elRobot = q('#robot')
+    const elRobotShort = q('#robotShort')
+    const elRobotEn = q('#robotEn')
+    const elTeam = q('#team')
+    const elTeamShort = q('#teamShort')
+    const elTeamEn = q('#teamEn')
+    const elOrder = q('#order')
 
-    const elList = q('#list');
-    const elCount = q('#count');
-
-    // 最新の名簿を保持（選択→フォーム反映に使う）
-    let currentRoster = [];
-
-    function send(action, extra) {
-        nodecg.sendMessage('player-control', { action, ...extra });
-    }
-
-    // 追加／上書き
-    q('#add').addEventListener('click', () => {
-        const id = elId.value.trim();
-        const robot = elRobot.value.trim();
-        if (!id || !robot) { alert('ID と Robot は必須です'); return; }
-
-        send('add', {
-            id,
-            robot,
-            robotShort: elRobotShort.value.trim(),
-            robotEn: elRobotEn.value.trim(),
-            team: elTeam.value.trim(),
-            teamShort: elTeamShort.value.trim(),
-            teamEn: elTeamEn.value.trim(),
-            order: elOrder.value === '' ? undefined : Number(elOrder.value),
-            appeal: elAppeal.value,
-            // ★ 追加: 任意の ruleId（空なら undefined として扱われる）
-            ruleId: elRuleId.value.trim() || undefined,
-        });
-    });
-
-    // 削除（選択行）
-    q('#remove').addEventListener('click', () => {
-        const opt = elList.selectedOptions[0];
-        if (!opt) return;
-        send('remove', { id: opt.value });
-    });
-
-    // 全消去
-    q('#clearRoster').addEventListener('click', () => send('clear-roster'));
-
-    // CSV インポート／エクスポート UI
+    // CSV UI
     const elCsv = q('#csvFile');
     q('#csvImportReplace').addEventListener('click', () => importCsv('replace'));
     q('#csvImportUpsert').addEventListener('click', () => importCsv('upsert'));
     q('#csvExport').addEventListener('click', exportCsv);
 
+    let currentRoster = [];
+
+    function send(action, x) { nodecg.sendMessage('player-control', { action, ...x }) }
+
+    // 追加/上書き（appeal削除・movement等フォームでは扱わない）
+    q('#add').addEventListener('click', () => {
+        const id = elId.value.trim();
+        const robot = elRobot.value.trim();
+        if (!id || !robot) return alert("IDとRobotは必須");
+
+        send('add', {
+            id, robot,
+            robotShort: elRobotShort.value.trim(),
+            robotEn: elRobotEn.value.trim(),
+            team: elTeam.value.trim(),
+            teamShort: elTeamShort.value.trim(),
+            teamEn: elTeamEn.value.trim(),
+            order: elOrder.value === '' ? undefined : +elOrder.value
+        });
+    });
+
+    q('#remove').addEventListener('click', () => {
+        const opt = q('#list').selectedOptions[0];
+        if (opt) send('remove', { id: opt.value });
+    });
+
+    q('#clearRoster').addEventListener('click', () => send('clear-roster'));
+
     function importCsv(mode) {
-        const file = elCsv.files?.[0];
-        if (!file) return alert('CSVファイルを選択してください。');
+        const f = elCsv.files?.[0];
+        if (!f) return alert("CSV選択を");
         const reader = new FileReader();
         reader.onload = () => {
-            try {
-                const rows = parseCsv(String(reader.result || ''));
-                if (!rows.length) return alert('有効な行が見つかりません。');
-                // そのまま extension へ
-                send('bulk-set', { mode, rows });
-            } catch (e) {
-                console.error(e);
-                alert('CSVの解析に失敗しました。');
-            }
-        };
-        reader.readAsText(file, 'utf-8');
+            const rows = parseCsv(String(reader.result || ''));
+            if (rows.length === 0) return alert("データなし");
+            send('bulk-set', { mode, rows });
+        }
+        reader.readAsText(f, 'utf-8');
     }
 
-    // ヘッダ必須。順不同OK。足りない列は空扱い。
-    // サポート列: id, robot, robotShort, robotEn, team, teamShort, teamEn, order, appeal, ruleId
+    /** CSV parser（movement tech power comment含む） */
     function parseCsv(text) {
-        const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n')
-            .map(l => l.trim()).filter(l => l.length > 0);
-        if (lines.length === 0) return [];
+        text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        const lines = text.split('\n').filter(l => l.trim() !== '');
 
-        const header = splitCsvLine(lines[0]).map(h => h.trim());
-        const idx = indexBy(header);
+        const header = split(lines[0]).map(h => h.trim().toLowerCase());
+        const idx = Object.fromEntries(header.map((h, i) => [h, i]));
 
-        const out = [];
+        const pick = (cols, name) => cols[idx[name]] ?? '';
+
+        const rows = [];
         for (let i = 1; i < lines.length; i++) {
-            const cols = splitCsvLine(lines[i]);
-            const get = (name) => {
-                const k = idx[name];
-                return (k == null) ? '' : (cols[k] ?? '').trim();
-            };
-            const row = {
-                id: get('id'),
-                robot: get('robot'),
-                robotShort: get('robotShort'),
-                robotEn: get('robotEn'),
-                team: get('team'),
-                teamShort: get('teamShort'),
-                teamEn: get('teamEn'),
-                order: get('order'),
-                appeal: get('appeal'),
-                ruleId: get('ruleId'), // ★ 追加
-            };
-            out.push(row);
-        }
-        return out;
-    }
+            const cols = split(lines[i]);
+            rows.push({
+                id: pick(cols, 'id'),
+                robot: pick(cols, 'robot'),
+                robotShort: pick(cols, 'robotshort'),
+                robotEn: pick(cols, 'roboten'),
+                team: pick(cols, 'team'),
+                teamShort: pick(cols, 'teamshort'),
+                teamEn: pick(cols, 'teamen'),
+                order: pick(cols, 'order'),
 
-    function indexBy(header) {
-        const names = ['id', 'robot', 'robotShort', 'robotEn', 'team', 'teamShort', 'teamEn', 'order', 'appeal', 'ruleId'];
-        const map = {};
-        for (const n of names) {
-            const k = header.findIndex(h => h.toLowerCase() === n.toLowerCase());
-            if (k >= 0) map[n] = k;
+                // ★ 追加
+                movement: pick(cols, 'movement'),
+                tech: pick(cols, 'tech'),
+                power: pick(cols, 'power'),
+                comment: pick(cols, 'comment'),
+            })
         }
-        if (map.id == null || map.robot == null) {
-            throw new Error('CSVヘッダに id, robot が必要です');
-        }
-        return map;
-    }
+        return rows;
 
-    function splitCsvLine(line) {
-        const res = []; let cur = ''; let inQ = false;
-        for (let i = 0; i < line.length; i++) {
-            const ch = line[i];
-            if (inQ) {
-                if (ch === `"`) {
-                    if (line[i + 1] === '"') { cur += `"`; i++; }
-                    else inQ = false;
-                } else cur += ch;
-            } else {
-                if (ch === `"`) { inQ = true; }
-                else if (ch === ',') { res.push(cur); cur = ''; }
-                else cur += ch;
+        function split(l) {
+            let a = [], cur = "", q = false;
+            for (let i = 0; i < l.length; i++) {
+                const c = l[i];
+                if (q) { if (c == '"' && l[i + 1] == '"') { cur += '"'; i++; } else if (c == '"') { q = false; } else cur += c; }
+                else { if (c == ',') { a.push(cur); cur = ""; } else if (c == '"') q = true; else cur += c; }
             }
+            a.push(cur);
+            return a;
         }
-        res.push(cur); return res;
     }
 
     function exportCsv() {
-        const list = currentRoster || [];
-        const header = ['id', 'robot', 'robotShort', 'robotEn', 'team', 'teamShort', 'teamEn', 'order', 'appeal', 'ruleId'].join(',');
-        const body = list.map(p =>
-            [
-                escCsv(p.id),
-                escCsv(p.robot),
-                escCsv(p.robotShort ?? ''),
-                escCsv(p.robotEn ?? ''),
-                escCsv(p.team ?? ''),
-                escCsv(p.teamShort ?? ''),
-                escCsv(p.teamEn ?? ''),
-                p.order == null ? '' : String(p.order),
-                escCsv(p.appeal ?? ''),
-                escCsv(p.ruleId ?? ''), // ★ 追加
-            ].join(',')
-        ).join('\n');
-        const csv = header + '\n' + body;
-        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-        const blob = new Blob([bom, csv], { type: 'text/csv;charset=utf-8;' });
+        const H = [
+            "id", "robot", "robotShort", "robotEn",
+            "team", "teamShort", "teamEn", "order",
+            "movement", "tech", "power", "comment"  // appeal削除
+        ];
+
+        const body = currentRoster.map(p => H.map(k => esc(p[k])).join(',')).join('\n');
+        const csv = H.join(',') + '\n' + body;
+
+        const BOM = new Uint8Array([0xEF, 0xBB, 0xBF]);
+        const blob = new Blob([BOM, csv], { type: "text/csv;charset=utf-8;" });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `player_roster_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`;
-        document.body.appendChild(a); a.click(); a.remove();
+        a.download = "player_roster.csv";
+        a.click();
     }
+    const esc = s => (/[",\n]/.test(s ?? '')) ? `"${String(s ?? '').replace(/"/g, '""')}"` : String(s ?? '');
 
-    function escCsv(s) { s = String(s); const nq = /[",\n]/.test(s); s = s.replace(/"/g, '""'); return nq ? `"${s}"` : s; }
-
-    // ─────────────────────────────────────
-    // リスト描画 & 選択 → フォーム反映
-    // ─────────────────────────────────────
-    roster.on('change', (list = []) => {
-        currentRoster = Array.isArray(list) ? list : [];
-        const sorted = [...currentRoster].sort((a, b) => {
-            const ao = a.order ?? 1e9, bo = b.order ?? 1e9;
-            if (ao !== bo) return ao - bo;
-            const at = (a.team || '').localeCompare(b.team || ''); if (at !== 0) return at;
-            return String(a.id).localeCompare(String(b.id));
-        });
-
-        elList.innerHTML = '';
-        sorted.forEach(p => {
-            const opt = document.createElement('option');
-            const order = p.order == null ? '-' : String(p.order);
-            const team = p.team ? ` / ${p.team}` : '';
-            const robot = p.robotShort || p.robot || '';
-            const rule = p.ruleId ? ` [rule:${p.ruleId}]` : ''; // ★ 任意で見やすく
-            opt.value = p.id;
-            opt.textContent = `[${order}] ID:${p.id}${team} / ${robot}${rule}`;
-            elList.appendChild(opt);
-        });
-        elCount.textContent = String(currentRoster.length);
+    roster.on('change', list => {
+        currentRoster = list || [];
+        render();
     });
 
-    // 選択したレコードをフォームへ反映
-    elList.addEventListener('change', () => {
-        const opt = elList.selectedOptions[0];
-        if (!opt) return;
-        const id = opt.value;
-        const rec = currentRoster.find(r => String(r.id) === String(id));
-        if (rec) fillForm(rec);
-    });
-
-    // ダブルクリックでも反映（任意・使いやすさ向上）
-    elList.addEventListener('dblclick', () => {
-        const opt = elList.selectedOptions[0];
-        if (!opt) return;
-        const id = opt.value;
-        const rec = currentRoster.find(r => String(r.id) === String(id));
-        if (rec) fillForm(rec);
-    });
-
-    function fillForm(rec) {
-        elId.value = String(rec.id ?? '');
-        elRobot.value = String(rec.robot ?? '');
-        elRobotShort.value = String(rec.robotShort ?? '');
-        elRobotEn.value = String(rec.robotEn ?? '');
-        elTeam.value = String(rec.team ?? '');
-        elTeamShort.value = String(rec.teamShort ?? '');
-        elTeamEn.value = String(rec.teamEn ?? '');
-        elOrder.value = rec.order == null ? '' : String(rec.order);
-        elAppeal.value = String(rec.appeal ?? '');
-        if (elRuleId) elRuleId.value = String(rec.ruleId ?? '');
+    function render() {
+        const elList = q('#list');
+        elList.innerHTML = "";
+        [...currentRoster].sort((a, b) => (a.order ?? 999999) - (b.order ?? 999999))
+            .forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `[${p.order ?? '-'}] ${p.teamShort || p.team || ''} / ${p.robotShort || p.robot}`;
+                elList.append(opt);
+            });
+        q('#count').textContent = currentRoster.length;
     }
 })();
