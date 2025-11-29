@@ -12,6 +12,10 @@
     const elTeamShort = q('#teamShort')
     const elTeamEn = q('#teamEn')
     const elOrder = q('#order')
+    const elMovement = q('#movement')
+    const elTech = q('#tech')
+    const elPower = q('#power')
+    const elComment = q('#comment')
 
     // CSV UI
     const elCsv = q('#csvFile');
@@ -36,7 +40,11 @@
             team: elTeam.value.trim(),
             teamShort: elTeamShort.value.trim(),
             teamEn: elTeamEn.value.trim(),
-            order: elOrder.value === '' ? undefined : +elOrder.value
+            order: elOrder.value === '' ? undefined : +elOrder.value,
+            movement: elMovement.value.trim(),
+            tech: elTech.value.trim(),
+            power: elPower.value.trim(),
+            comment: elComment.value.trim()
         });
     });
 
