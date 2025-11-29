@@ -1,3 +1,14 @@
+(function () {
+    const vis = nodecg.Replicant('graphicsVisibility');
+    const visibleRoot = document.getElementById('visible-root');
+
+    vis.on('change', (v = {}) => {
+        const visible = !!v.robotInfo;
+        visibleRoot.classList.toggle('active', visible);
+        // root.classList.toggle('visible', visible); // ← visibleも使いたかったらこれもON
+    });
+})();
+
 // currentPlayer を購読して平文表示
 (function () {
     const cur = nodecg.Replicant('currentPlayer');

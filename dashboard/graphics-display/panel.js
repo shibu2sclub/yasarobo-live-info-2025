@@ -10,6 +10,10 @@ const graphicsList = [
     {
         "name": 'point-detail',
         "id": 'pointDetail'
+    },
+    {
+        "name": 'robot-info',
+        "id": 'robotInfo'
     }
 ]
 
