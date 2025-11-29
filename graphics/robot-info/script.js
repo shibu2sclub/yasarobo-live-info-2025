@@ -13,8 +13,9 @@
 (function () {
     const cur = nodecg.Replicant('currentPlayer');
     cur.on('change', (p) => {
-        const el = document.getElementById('playerId');
-        const el2 = document.getElementById('robotName');
+        console.log(cur);
+        const el = document.getElementById('id');
+        const el2 = document.getElementById('robot-name');
         if (!el) return;
         if (!p) {
             el.textContent = '—';
@@ -23,6 +24,17 @@
             el.textContent = `${p.id}`;
             el2.textContent = `${p.robot}`;
         }
+        const el3 = document.getElementById("team-name");
+        const el4 = document.getElementById("movement");
+        const el5 = document.getElementById("technology");
+        const el6 = document.getElementById("power-source");
+        const el7 = document.getElementById("comment");
+
+        el3.textContent = `${p.team}`;
+        el4.textContent = `${p.movement}`;
+        el5.textContent = `${p.tech}`;
+        el6.textContent = `${p.power}`;
+        el7.textContent = `${p.comment}`;
     });
 })();
 
@@ -47,24 +59,6 @@
         } else {
             pill.style.display = 'none';
         }
-
-
-        const maxEl = document.getElementById('max-points');
-        let max = 0;
-        console.log(v?.maxPoints);
-        if (v?.maxPoints != undefined) {
-            max = Number(v?.maxPoints || 0);
-        }
-        else {
-            const rules = nodecg.Replicant('rules');
-            for (const r of (rules.value?.items || [])) {
-                if (typeof r.cap === 'number' && r.cap > 0) {
-                    const pc = typeof r.pointsCorrect === 'number' ? r.pointsCorrect : 0;
-                    max += pc * r.cap;
-                }
-            }
-        }
-        maxEl.textContent = `${max}`;
     }
 
     rules.on('change', applyRule);
