@@ -1,4 +1,6 @@
-id,robot,robotShort,robotEn,team,teamShort,teamEn,order,appeal
-1001,Raptor-X,R-X,Raptor-X,YASA Lab A,YASA A,YASA Lab A,1,"高機動型カスタム"
-1002,雷神,雷,Raijin,八紗工房B,八紗B,YASA Factory B,2,"重量球を安定搬送"
-1003,鳳凰,,Houou,Team Phoenix,TP,Team Phoenix,, "初出場です！"
+id,robot,robotShort,robotEn,team,teamShort,teamEn,order,movement,tech,power,comment
+1001,八紗一号,Y1,YASARobo-1,八紗工房A,八紗A,YASA Lab A,1,4輪独立,PID制御,LiPo 3S,"初参加！安定走行を目指します。"
+1002,雷迅-Raijin,RJ,Raijin Mark-II,雷電工学部,雷電B,Raiden Tech,2,メカナム,SLAM,LiFe 2S,"スピード重視\n新型アルゴリズム搭載！"
+1003,焔の舞 Type-R,HR,Blaze R,チーム火華,火華,Fireworks,3,クローラー,LIDAR+AI,NiMH,"パワーと安定の両立。障害物に強い:fire:"
+1004,蒼天蒼牙,SOG,Blue Fang,蒼翼研究会,蒼翼,Blue Wings,4,二足歩行,Vision Tracking,LiPo 4S,"AI認識強化版。\n制御精度UP！"
+1005,白嶺雪影,SS,White Shadow,白峰工学,白峰,Shirahone Eng,5,三輪差動,DeepRL,LiPo 2S,"静かで速い、影の刺客。"
